@@ -20,7 +20,9 @@ AddrCheckStruct subaru_rx_checks[] = {
   {.msg = {{0x119, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 20000U}}},
   {.msg = {{0x139, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 20000U}}},
   {.msg = {{0x13a, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 20000U}}},
-  {.msg = {{0x240, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 50000U}}},
+  // Crosstrek 2020 Hybrid does not have 20Hz CruiseControl message, use 10Hz ES_DashStatus instead
+  //{.msg = {{0x240, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 50000U}}},
+  {.msg = {{0x321, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 100000U}}},
 };
 const int SUBARU_RX_CHECK_LEN = sizeof(subaru_rx_checks) / sizeof(subaru_rx_checks[0]);
 
@@ -71,8 +73,8 @@ static int subaru_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
     }
 
     // enter controls on rising edge of ACC, exit controls on ACC off
-    if (addr == 0x240) {
-      int cruise_engaged = ((GET_BYTES_48(to_push) >> 9) & 1);
+    if (addr == 0x321) {
+      int cruise_engaged = ((GET_BYTES_48(to_push) >> 4) & 1);
       if (cruise_engaged && !cruise_engaged_prev) {
         controls_allowed = 1;
       }
