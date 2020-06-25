@@ -16,13 +16,11 @@ const CanMsg SUBARU_TX_MSGS[] = {{0x122, 0, 8}, {0x221, 0, 8}, {0x322, 0, 8}};
 const int SUBARU_TX_MSGS_LEN = sizeof(SUBARU_TX_MSGS) / sizeof(SUBARU_TX_MSGS[0]);
 
 AddrCheckStruct subaru_rx_checks[] = {
-  //{.msg = {{ 0x40, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 10000U}}},
-  {.msg = {{0x119, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 20000U}}},
-  //{.msg = {{0x139, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 20000U}}},
-  //{.msg = {{0x13a, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 20000U}}},
-  // Crosstrek 2020 Hybrid does not have 20Hz CruiseControl message, use 10Hz ES_DashStatus instead
-  //{.msg = {{0x240, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 50000U}}},
-  //{.msg = {{0x321, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 100000U}}},
+  {.msg = {{0x119, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep =  20000U}}},
+  {.msg = {{0x139, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep =  20000U}}},
+  {.msg = {{0x13a, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep =  20000U}}},
+  {.msg = {{0x168, 1, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep =  10000U}}},
+  {.msg = {{0x321, 2, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 100000U}}},
 };
 const int SUBARU_RX_CHECK_LEN = sizeof(subaru_rx_checks) / sizeof(subaru_rx_checks[0]);
 
@@ -63,8 +61,11 @@ static int subaru_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
   bool valid = addr_safety_check(to_push, subaru_rx_checks, SUBARU_RX_CHECK_LEN,
                             subaru_get_checksum, subaru_compute_checksum, subaru_get_counter);
 
-  if (valid && (GET_BUS(to_push) == 0)) {
+  if (valid) {
     int addr = GET_ADDR(to_push);
+  }
+
+  if (valid && (GET_BUS(to_push) == 0)) {
     if (addr == 0x119) {
       int torque_driver_new;
       torque_driver_new = ((GET_BYTES_04(to_push) >> 16) & 0x7FF);
@@ -72,7 +73,27 @@ static int subaru_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       update_sample(&torque_driver, torque_driver_new);
     }
 
-    // enter controls on rising edge of ACC, exit controls on ACC off
+    // sample subaru wheel speed, averaging opposite corners (Wheel_Speeds)
+    if (addr == 0x13a) {
+      int subaru_speed = (GET_BYTES_04(to_push) >> 12) & 0x1FFF;  // FR
+      subaru_speed += (GET_BYTES_48(to_push) >> 6) & 0x1FFF;  // RL
+      subaru_speed /= 2;
+      vehicle_moving = subaru_speed > SUBARU_STANDSTILL_THRSLD;
+    }
+
+    // exit controls on rising edge of brake press (Brake_Pedal)
+    if (addr == 0x139) {
+      brake_pressed = (GET_BYTES_48(to_push) & 0xFFF0) > 0;
+    }
+  }
+  else if (valid && (GET_BUS(to_push) == 1)) {
+    // exit controls on rising edge of gas press (Throttle_Hybrid)
+    if (addr == 0x168) {
+      gas_pressed = GET_BYTE(to_push, 4) != 0;
+    }
+  }
+  else if (valid && (GET_BUS(to_push) == 2)) {
+    // enter controls on rising edge of ACC, exit controls on ACC off (ES_DashStatus)
     if (addr == 0x321) {
       int cruise_engaged = ((GET_BYTES_48(to_push) >> 4) & 1);
       if (cruise_engaged && !cruise_engaged_prev) {
@@ -83,25 +104,12 @@ static int subaru_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       }
       cruise_engaged_prev = cruise_engaged;
     }
+  }
 
-    // sample wheel speed, averaging opposite corners
-    if (addr == 0x13a) {
-      int subaru_speed = (GET_BYTES_04(to_push) >> 12) & 0x1FFF;  // FR
-      subaru_speed += (GET_BYTES_48(to_push) >> 6) & 0x1FFF;  // RL
-      subaru_speed /= 2;
-      vehicle_moving = subaru_speed > SUBARU_STANDSTILL_THRSLD;
-    }
-
-    if (addr == 0x139) {
-      brake_pressed = (GET_BYTES_48(to_push) & 0xFFF0) > 0;
-    }
-
-    if (addr == 0x40) {
-      gas_pressed = GET_BYTE(to_push, 4) != 0;
-    }
-
+  if (valid) {
     generic_rx_checks((addr == 0x122));
   }
+
   return valid;
 }
 
@@ -287,15 +295,19 @@ static int subaru_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
   int bus_fwd = -1;
 
   if (!relay_malfunction) {
+    int addr = GET_ADDR(to_fwd);
     if (bus_num == 0) {
-      bus_fwd = 2;  // Camera CAN
+      // Global platform
+      // 0x139 Brake_Pedal
+      int block_msg = (addr == 0x139);
+      if (!block_msg) {
+        bus_fwd = 2;  // Camera CAN
+      }
     }
     if (bus_num == 2) {
       // Global platform
       // 0x122 ES_LKAS
-      // 0x221 ES_Distance - Disabled for 2020H
       // 0x322 ES_LKAS_State
-      int addr = GET_ADDR(to_fwd);
       int block_msg = ((addr == 0x122) || (addr == 0x322));
       if (!block_msg) {
         bus_fwd = 0;  // Main CAN
