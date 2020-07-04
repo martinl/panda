@@ -83,13 +83,13 @@ static int subaru_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       brake_pressed = (GET_BYTES_48(to_push) & 0xFFF0) > 0;
     }
   }
-  else if (valid && (GET_BUS(to_push) == 1)) {
+  if (valid && (GET_BUS(to_push) == 1)) {
     // exit controls on rising edge of gas press (Throttle_Hybrid)
     if (addr == 0x168) {
       gas_pressed = GET_BYTE(to_push, 4) != 0;
     }
   }
-  else if (valid && (GET_BUS(to_push) == 2)) {
+  if (valid && (GET_BUS(to_push) == 2)) {
     // enter controls on rising edge of ACC, exit controls on ACC off (ES_DashStatus)
     if (addr == 0x321) {
       int cruise_engaged = ((GET_BYTES_48(to_push) >> 4) & 1);
