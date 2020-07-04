@@ -60,10 +60,7 @@ static int subaru_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
 
   bool valid = addr_safety_check(to_push, subaru_rx_checks, SUBARU_RX_CHECK_LEN,
                             subaru_get_checksum, subaru_compute_checksum, subaru_get_counter);
-
-  if (valid) {
-    int addr = GET_ADDR(to_push);
-  }
+  int addr = GET_ADDR(to_push);
 
   if (valid && (GET_BUS(to_push) == 0)) {
     if (addr == 0x119) {
