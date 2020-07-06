@@ -82,6 +82,7 @@ static int subaru_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
     if (addr == 0x139) {
       brake_pressed = (GET_BYTES_48(to_push) & 0xFFF0) > 1;
     }
+    generic_rx_checks((addr == 0x122));
   }
   if (valid && (GET_BUS(to_push) == 1)) {
     // exit controls on rising edge of gas press (Throttle_Hybrid)
@@ -101,10 +102,6 @@ static int subaru_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       }
       cruise_engaged_prev = cruise_engaged;
     }
-  }
-
-  if (valid) {
-    generic_rx_checks((addr == 0x122));
   }
 
   return valid;
