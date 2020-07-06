@@ -81,13 +81,25 @@ static int subaru_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
     // exit controls on rising edge of brake press (Brake_Pedal)
     if (addr == 0x139) {
       brake_pressed = (GET_BYTES_48(to_push) & 0xFFF0) > 1;
+      if (brake_pressed && (!brake_pressed_prev || vehicle_moving)) {
+        controls_allowed = 0;
+      }
+      brake_pressed_prev = brake_pressed;
     }
-    generic_rx_checks((addr == 0x122));
+
+    // check if stock ECU is on bus broken by car harness
+    if ((safety_mode_cnt > RELAY_TRNS_TIMEOUT) && (addr == 0x122)) {
+      relay_malfunction_set();
+    }
   }
   if (valid && (GET_BUS(to_push) == 1)) {
     // exit controls on rising edge of gas press (Throttle_Hybrid)
     if (addr == 0x168) {
       gas_pressed = GET_BYTE(to_push, 4) != 0;
+      if (gas_pressed && !gas_pressed_prev && !(unsafe_mode & UNSAFE_DISABLE_DISENGAGE_ON_GAS)) {
+        controls_allowed = 0;
+      }
+      gas_pressed_prev = gas_pressed;
     }
   }
   if (valid && (GET_BUS(to_push) == 2)) {
