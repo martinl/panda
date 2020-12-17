@@ -155,13 +155,7 @@ static int subaru_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
 
   if (!relay_malfunction) {
     if (bus_num == 0) {
-      //int addr = GET_ADDR(to_fwd);
-      // Global platform
-      // 0x390 Dashlights
-      //int block_msg = (addr == 0x390));
-      //if (!block_msg) {
-        bus_fwd = 2;  // Camera CAN
-      //}
+      bus_fwd = 2;  // Camera CAN
     }
     if (bus_num == 2) {
       // Global platform
