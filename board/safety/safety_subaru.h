@@ -159,7 +159,7 @@ static int subaru_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
       // Global platform
       // 0x40 Throttle
       // 0x139 Brake_Pedal
-      int block_msg = ((addr == 0x40) || (0x139));
+      int block_msg = ((addr == 0x40) || (addr == 0x139));
       if (!block_msg) {
         bus_fwd = 2;  // Camera CAN
       }
