@@ -51,7 +51,7 @@ class TestSubaruSafety(common.PandaSafetyTest):
     values = {s: speed * 0.057 for s in ["FR", "FL", "RR", "RL"]}
     values["Counter"] = self.cnt_speed % 4
     self.__class__.cnt_speed += 1
-    return self.packer.make_can_msg_panda("Wheel_Speeds", 0, values)
+    return self.packer.make_can_msg_panda("Wheel_Speeds", 1, values)
 
   def _brake_msg(self, brake):
     values = {"Brake_Pedal": brake, "Counter": self.cnt_brake % 4}
@@ -70,7 +70,7 @@ class TestSubaruSafety(common.PandaSafetyTest):
   def _pcm_status_msg(self, enable):
     values = {"Cruise_Activated": enable, "Counter": self.cnt_cruise % 4}
     self.__class__.cnt_cruise += 1
-    return self.packer.make_can_msg_panda("CruiseControl", 0, values)
+    return self.packer.make_can_msg_panda("CruiseControl", 1, values)
 
   def _set_torque_driver(self, min_t, max_t):
     for _ in range(0, 5):
