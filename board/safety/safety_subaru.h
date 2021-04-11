@@ -97,9 +97,6 @@ static int subaru_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
     }
     gas_pressed_prev = gas_pressed;
 
-  }
-
-  if (valid && (GET_BUS(to_push) == 2)) {
     // check if stock ECU is on bus broken by car harness
     if (addr == 0x122) {
       if (safety_mode_cnt > RELAY_TRNS_TIMEOUT) {
