@@ -1,8 +1,15 @@
-#ifdef STM32F4
-  #include "stm32f4xx_hal_gpio_ex.h"
-#else
-  #include "stm32f2xx_hal_gpio_ex.h"
-#endif
+void gpio_usb_init(void) {
+  // A11,A12: USB
+  set_gpio_alternate(GPIOA, 11, GPIO_AF10_OTG_FS);
+  set_gpio_alternate(GPIOA, 12, GPIO_AF10_OTG_FS);
+  GPIOA->OSPEEDR = GPIO_OSPEEDER_OSPEEDR11 | GPIO_OSPEEDER_OSPEEDR12;
+}
+
+void gpio_usart2_init(void) {
+  // A2,A3: USART 2 for debugging
+  set_gpio_alternate(GPIOA, 2, GPIO_AF7_USART2);
+  set_gpio_alternate(GPIOA, 3, GPIO_AF7_USART2);
+}
 
 // Common GPIO initialization
 void common_init_gpio(void){
@@ -18,10 +25,7 @@ void common_init_gpio(void){
   // C2: Voltage sense line
   set_gpio_mode(GPIOC, 2, MODE_ANALOG);
 
-  // A11,A12: USB
-  set_gpio_alternate(GPIOA, 11, GPIO_AF10_OTG_FS);
-  set_gpio_alternate(GPIOA, 12, GPIO_AF10_OTG_FS);
-  GPIOA->OSPEEDR = GPIO_OSPEEDER_OSPEEDR11 | GPIO_OSPEEDER_OSPEEDR12;
+  gpio_usb_init();
 
   // A9,A10: USART 1 for talking to the GPS
   set_gpio_alternate(GPIOA, 9, GPIO_AF7_USART1);
@@ -35,6 +39,13 @@ void common_init_gpio(void){
     set_gpio_alternate(GPIOB, 8, GPIO_AF9_CAN1);
     set_gpio_alternate(GPIOB, 9, GPIO_AF9_CAN1);
   #endif
+}
+
+void flasher_peripherals_init(void) {
+  RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
+  RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
+  RCC->AHB2ENR |= RCC_AHB2ENR_OTGFSEN;
+  RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
 }
 
 // Peripheral initialization
@@ -73,13 +84,6 @@ void peripherals_init(void){
   RCC->APB2ENR |= RCC_APB2ENR_TIM9EN;  // slow loop
 }
 
-// Detection with internal pullup
-#define PULL_EFFECTIVE_DELAY 4096
-bool detect_with_pull(GPIO_TypeDef *GPIO, int pin, int mode) {
-  set_gpio_mode(GPIO, pin, MODE_INPUT);
-  set_gpio_pullup(GPIO, pin, mode);
-  for (volatile int i=0; i<PULL_EFFECTIVE_DELAY; i++);
-  bool ret = get_gpio_input(GPIO, pin);
-  set_gpio_pullup(GPIO, pin, PULL_NONE);
-  return ret;
+void enable_interrupt_timer(void) {
+  register_set_bits(&(RCC->APB1ENR), RCC_APB1ENR_TIM6EN);  // Enable interrupt timer peripheral
 }
