@@ -395,12 +395,16 @@ class IsoTpMessage():
 
   def recv(self) -> Optional[bytes]:
     start_time = time.time()
+    self.rx_idx_prev = 0
     try:
       while True:
         for msg in self._can_client.recv():
           self._isotp_rx_next(msg)
           if self.tx_done and self.rx_done:
             return self.rx_dat
+          if self.rx_idx > self.rx_idx_prev:
+            start_time = time.time()
+            self.rx_idx_prev = self.rx_idx
         # no timeout indicates non-blocking
         if self.timeout == 0:
           return None
@@ -654,7 +658,7 @@ class UdsClient():
     resp = self._uds_request(SERVICE_TYPE.READ_DATA_BY_IDENTIFIER, subfunction=None, data=data)
     resp_id = struct.unpack('!H', resp[0:2])[0] if len(resp) >= 2 else None
     if resp_id != data_identifier_type:
-      raise ValueError('invalid response data identifier: {}'.format(hex(resp_id)))
+      raise ValueError('invalid response data identifier: {} expected: {}'.format(hex(resp_id), hex(data_identifier_type)))
     return resp[2:]
 
   def read_memory_by_address(self, memory_address: int, memory_size: int, memory_address_bytes: int = 4, memory_size_bytes: int = 1):
