@@ -409,7 +409,8 @@ class IsoTpMessage():
               print("ISO-TP: RX - incoming fragment: extend timeout")
           if self.rx_dat[0] = 0x7F and self.rx_dat[2] == 0x78:
             start_time = time.time()
-            print("ISO-TP: RX - response pending: extend timeout")
+            if self.debug:
+              print("ISO-TP: RX - response pending: extend timeout")
         # no timeout indicates non-blocking
         if self.timeout == 0:
           return None
