@@ -394,7 +394,7 @@ class IsoTpMessage():
       msg = (struct.pack("!H", 0x1000 | self.tx_len) + self.tx_dat[:self.max_len - 2]).ljust(self.max_len - 2, b"\x00")
     self._can_client.send([msg])
 
-  def recv(self, response_pending) -> Optional[bytes]:
+  def recv(self, response_pending: bool = False) -> Optional[bytes]:
     start_time = time.time()
     self.rx_idx_prev = 0
     try:
