@@ -355,12 +355,13 @@ class CanClient():
         self._recv_buffer()
 
 class IsoTpMessage():
-  def __init__(self, can_client: CanClient, timeout: float = 1, response_pending_timeout: float = 5, debug: bool = False, max_len: int = 8):
+  def __init__(self, can_client: CanClient, timeout: float = 1, debug: bool = False, max_len: int = 8, response_pending_timeout: float = 5):
     self._can_client = can_client
     self.timeout = timeout
-    self.response_pending_timeout = response_pending_timeout
     self.debug = debug
     self.max_len = max_len
+    self.response_pending_timeout = response_pending_timeout
+    self.response_pending = False
 
   def send(self, dat: bytes) -> None:
     # throw away any stale data
@@ -394,7 +395,7 @@ class IsoTpMessage():
       msg = (struct.pack("!H", 0x1000 | self.tx_len) + self.tx_dat[:self.max_len - 2]).ljust(self.max_len - 2, b"\x00")
     self._can_client.send([msg])
 
-  def recv(self, response_pending: bool = False) -> Optional[bytes]:
+  def recv(self) -> Optional[bytes]:
     start_time = time.time()
     self.rx_idx_prev = 0
     try:
@@ -409,7 +410,7 @@ class IsoTpMessage():
         # no timeout indicates non-blocking
         if self.timeout == 0:
           return None
-        if response_pending:
+        if self.response_pending:
           if time.time() - start_time > self.response_pending_timeout:
             raise MessageTimeoutError("timeout waiting for pending response")
         elif time.time() - start_time > self.timeout:
@@ -530,9 +531,8 @@ class UdsClient():
     # send request, wait for response
     isotp_msg = IsoTpMessage(self._can_client, self.timeout, self.debug)
     isotp_msg.send(req)
-    response_pending = False
     while True:
-      resp = isotp_msg.recv(response_pending)
+      resp = isotp_msg.recv()
 
       if resp is None:
         continue
@@ -553,7 +553,7 @@ class UdsClient():
           error_desc = resp[3:].hex()
         # wait for another message if response pending
         if error_code == 0x78:
-          response_pending = True
+          isotp_msg.response_pending = True
           if self.debug:
             print("UDS-RX: response pending")
           continue
