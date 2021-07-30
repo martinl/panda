@@ -32,3 +32,4 @@ if __name__ == "__main__":
 
       # send nissan custom msg (tester present?)
       panda.can_send(tx_addr, "3000000000000000", 0)
+      #panda.can_send(tx_addr, "30000a0000000000", 0)
