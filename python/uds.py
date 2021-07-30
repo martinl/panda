@@ -400,14 +400,14 @@ class IsoTpMessage():
       while True:
         for msg in self._can_client.recv():
           self._isotp_rx_next(msg)
+          start_time = time.time()
+          response_pending = False
           if self.tx_done and self.rx_done:
             return self.rx_dat
-          start_time = time.time()
         # no timeout indicates non-blocking
         if self.timeout == 0:
           return None
         if response_pending:
-          response_pending = False
           if time.time() - start_time > self.response_pending_timeout:
             raise MessageTimeoutError("timeout waiting for pending response")
         elif time.time() - start_time > self.timeout:
