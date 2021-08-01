@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-import time
 import argparse
+from tqdm import tqdm
 from panda import Panda
 from hexdump import hexdump
 from panda.python.isotp import isotp_send, isotp_recv
