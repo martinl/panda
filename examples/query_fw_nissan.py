@@ -61,7 +61,7 @@ if __name__ == "__main__":
   if args.rxoffset:
     rx_offsets = [int(args.rxoffset, base=16)]
   else:
-    rx_offsets = [0x1, 0x3, 0x8, 0x22, 0x37]
+    rx_offsets = [0x1, 0x3, 0x8, 0x20, 0x22, 0x37]
 
   # for ISO-TP
   DEBUG=args.debug
