@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
       resp = {}
       for rx_offset in rx_offsets:
-        for label, req in can_req:
+        for label, req in can_req.items():
           isotp_send(panda, req, addr)
           # request all responses for iso-tp request
           #panda.can_send(addr, "30000a0000000000", 0)
