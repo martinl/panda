@@ -354,8 +354,6 @@ const safety_hooks subaru_hooks = {
   .tx = subaru_tx_hook,
   .tx_lin = nooutput_tx_lin_hook,
   .fwd = subaru_fwd_hook,
-  .addr_check = subaru_rx_checks,
-  .addr_check_len = sizeof(subaru_rx_checks) / sizeof(subaru_rx_checks[0]),
 };
 
 static const addr_checks* subaru_legacy_init(int16_t param) {
@@ -372,6 +370,4 @@ const safety_hooks subaru_legacy_hooks = {
   .tx = subaru_legacy_tx_hook,
   .tx_lin = nooutput_tx_lin_hook,
   .fwd = subaru_legacy_fwd_hook,
-  .addr_check = subaru_l_rx_checks,
-  .addr_check_len = sizeof(subaru_l_rx_checks) / sizeof(subaru_l_rx_checks[0]),
 };
