@@ -430,6 +430,11 @@ class PandaSafetyTest(PandaSafetyTestBase):
             # TODO: Temporary, should be fixed in panda firmware, safety_honda.h
             if attr in ['TestHondaBoschLongGiraffeSafety', 'TestHondaNidecSafety']:
               tx = list(filter(lambda m: m[0] not in [0x1FA, 0x30C], tx))
+            # TODO: refactor subaru and subaru_legacy safety
+            if attr in ['TestSubaru2020Safety', 'TestSubaruSafety']:
+              tx = list(filter(lambda m: m[0] not in [0x122, 0x221, 0x322], tx))
+            if attr in ['TestSubaruLegacy2019Safety', 'TestSubaruLegacySafety']:
+              tx = list(filter(lambda m: m[0] not in [0x161, 0x164], tx))
             all_tx.append(tx)
 
     # make sure we got all the msgs
