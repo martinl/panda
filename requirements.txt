@@ -10,5 +10,5 @@ flake8==3.7.9
 cffi==1.14.3
 crcmod
 pre-commit==2.4.0
-pylint==2.5.2
+pylint==2.7.0
 scons==4.1.0.post1
