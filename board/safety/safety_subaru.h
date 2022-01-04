@@ -13,7 +13,7 @@ const uint32_t SUBARU_L_BRAKE_THRSLD = 2; // filter sensor noise, max_brake is 4
 const CanMsg SUBARU_TX_MSGS[] = {{0x122, 0, 8}, {0x221, 0, 8}, {0x321, 0, 8}, {0x322, 0, 8}, {0x40, 2, 8}, {0x139, 2, 8}};
 #define SUBARU_TX_MSGS_LEN (sizeof(SUBARU_TX_MSGS) / sizeof(SUBARU_TX_MSGS[0]))
 
-const CanMsg SUBARU_L_TX_MSGS[] = {{0x161, 0, 8}, {0x164, 0, 8}, {0x140, 2, 8}};
+const CanMsg SUBARU_L_TX_MSGS[] = {{0x161, 0, 8}, {0x164, 0, 8}, {0x140, 2, 8}, {0xD1, 2, 8}};
 #define SUBARU_L_TX_MSGS_LEN (sizeof(SUBARU_L_TX_MSGS) / sizeof(SUBARU_L_TX_MSGS[0]))
 
 const CanMsg SUBARU_GEN2_TX_MSGS[] = {{0x122, 0, 8}, {0x321, 0, 8}, {0x322, 0, 8}, {0x40, 2, 8}, {0x139, 2, 8}};
