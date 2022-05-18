@@ -41,7 +41,8 @@
 #define SAFETY_HYUNDAI_COMMUNITY 24U
 #define SAFETY_STELLANTIS 25U
 #define SAFETY_SUBARU_GEN2 26U
-#define SAFETY_SUBARU_HYBRID 27U
+#define SAFETY_SUBARU_CROSSTREK_H 27U
+#define SAFETY_SUBARU_FORESTER_H 28U
 
 uint16_t current_safety_mode = SAFETY_SILENT;
 int16_t current_safety_param = 0;
