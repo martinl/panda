@@ -592,7 +592,21 @@ static int subaru_forester_h_rx_hook(CANPacket_t *to_push) {
       torque_driver_new = -1 * to_signed(torque_driver_new, 11);
       update_sample(&torque_driver, torque_driver_new);
     }
-
+  }
+  if (valid && (GET_BUS(to_push) == 2U)) {
+    // enter controls on rising edge of ACC, exit controls on ACC off (ES_DashStatus)
+    if (addr == 0x321) {
+      int cruise_engaged = ((GET_BYTES_48(to_push) >> 4) & 1U);
+      if (cruise_engaged && !cruise_engaged_prev) {
+        controls_allowed = 1;
+      }
+      if (!cruise_engaged) {
+        controls_allowed = 0;
+      }
+      cruise_engaged_prev = cruise_engaged;
+    }
+  }
+  if (valid && (GET_BUS(to_push) == 0U)) {
     // sample wheel speed, averaging opposite corners
     if (addr == 0x13a) {
       int subaru_speed = ((GET_BYTES_04(to_push) >> 12) & 0x1FFFU) + ((GET_BYTES_48(to_push) >> 6) & 0x1FFFU);  // FR + RL
@@ -608,23 +622,7 @@ static int subaru_forester_h_rx_hook(CANPacket_t *to_push) {
       gas_pressed = GET_BYTE(to_push, 4) != 0U;
     }
 
-    // check if stock ECU is on bus broken by car harness
-    if ((safety_mode_cnt > RELAY_TRNS_TIMEOUT) && (addr == 0x122)) {
-      relay_malfunction_set();
-    }
-  }
-  if (valid && (GET_BUS(to_push) == 2U)) {
-    // enter controls on rising edge of ACC, exit controls on ACC off (ES_DashStatus)
-    if (addr == 0x321) {
-      int cruise_engaged = ((GET_BYTES_48(to_push) >> 4) & 1U);
-      if (cruise_engaged && !cruise_engaged_prev) {
-        controls_allowed = 1;
-      }
-      if (!cruise_engaged) {
-        controls_allowed = 0;
-      }
-      cruise_engaged_prev = cruise_engaged;
-    }
+    generic_rx_checks((addr == 0x122));
   }
   return valid;
 }
