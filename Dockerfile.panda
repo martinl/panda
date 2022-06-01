@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     make \
     ocl-icd-opencl-dev \
     opencl-headers  \
+    patch \
     pkg-config \
     python \
     python-dev \
