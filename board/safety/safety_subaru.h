@@ -370,7 +370,7 @@ static int subaru_gen2_rx_hook(CANPacket_t *to_push) {
   bool valid = addr_safety_check(to_push, &subaru_gen2_rx_checks,
                             subaru_get_checksum, subaru_compute_checksum, subaru_get_counter);
   int addr = GET_ADDR(to_push);
-  int bus = GET_BUS(to_push);
+  uint8_t bus = GET_BUS(to_push);
 
   if (valid && (bus == 0U)) {
     if (addr == 0x119) {
@@ -527,7 +527,7 @@ static int subaru_crosstrek_hybrid_rx_hook(CANPacket_t *to_push) {
   bool valid = addr_safety_check(to_push, &subaru_crosstrek_hybrid_rx_checks,
                             subaru_get_checksum, subaru_compute_checksum, subaru_get_counter);
   int addr = GET_ADDR(to_push);
-  int bus = GET_BUS(to_push);
+  uint8_t bus = GET_BUS(to_push);
 
   if (valid && (bus == 0U)) {
     if (addr == 0x119) {
