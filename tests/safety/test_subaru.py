@@ -72,6 +72,19 @@ class TestSubaruSafety(common.PandaSafetyTest, common.DriverTorqueSteeringSafety
     self.__class__.cnt_cruise += 1
     return self.packer.make_can_msg_panda("CruiseControl", 0, values)
 
+class TestSubaruForesterHybridSafety(TestSubaruSafety):
+
+  def setUp(self):
+    self.packer = CANPackerPanda("subaru_global_2017_generated")
+    self.safety = libpandasafety_py.libpandasafety
+    self.safety.set_safety_hooks(Panda.SAFETY_SUBARU_FORESTER_HYBRID, 0)
+    self.safety.init_tests()
+
+  def _pcm_status_msg(self, enable):
+    values = {"Cruise_Activated": enable, "Counter": self.cnt_cruise % 4}
+    self.__class__.cnt_cruise += 1
+    return self.packer.make_can_msg_panda("ES_DashStatus", 2, values)
+
 
 if __name__ == "__main__":
   unittest.main()
