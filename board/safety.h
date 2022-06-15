@@ -54,7 +54,8 @@
 #define SAFETY_BODY 27U
 #define SAFETY_HYUNDAI_HDA2 28U
 #define SAFETY_SUBARU_GEN2 29U
-#define SAFETY_SUBARU_HYBRID 30U
+#define SAFETY_SUBARU_CROSSTREK_HYBRID 30U
+#define SAFETY_SUBARU_FORESTER_HYBRID 31U
 
 uint16_t current_safety_mode = SAFETY_SILENT;
 uint16_t current_safety_param = 0;
@@ -275,7 +276,8 @@ const safety_hook_config safety_hook_registry[] = {
   {SAFETY_CHRYSLER, &chrysler_hooks},
   {SAFETY_SUBARU, &subaru_hooks},
   {SAFETY_SUBARU_GEN2, &subaru_gen2_hooks},
-  {SAFETY_SUBARU_HYBRID, &subaru_hybrid_hooks},
+  {SAFETY_SUBARU_CROSSTREK_HYBRID, &subaru_crosstrek_hybrid_hooks},
+  {SAFETY_SUBARU_FORESTER_HYBRID, &subaru_forester_hybrid_hooks},
   {SAFETY_VOLKSWAGEN_MQB, &volkswagen_mqb_hooks},
   {SAFETY_NISSAN, &nissan_hooks},
   {SAFETY_NOOUTPUT, &nooutput_hooks},

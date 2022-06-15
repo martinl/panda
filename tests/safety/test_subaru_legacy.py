@@ -6,13 +6,6 @@ import panda.tests.safety.common as common
 from panda.tests.safety.common import CANPackerPanda
 
 
-MAX_RT_DELTA = 940
-RT_INTERVAL = 250000
-
-DRIVER_TORQUE_ALLOWANCE = 60
-DRIVER_TORQUE_FACTOR = 10
-BRAKE_THRESHOLD = 2
-
 
 class TestSubaruLegacySafety(common.PandaSafetyTest, common.DriverTorqueSteeringSafetyTest):
   cnt_gas = 0
@@ -33,6 +26,8 @@ class TestSubaruLegacySafety(common.PandaSafetyTest, common.DriverTorqueSteering
 
   DRIVER_TORQUE_ALLOWANCE = 75
   DRIVER_TORQUE_FACTOR = 10
+
+  BRAKE_THRESHOLD = 2
 
   def setUp(self):
     self.packer = CANPackerPanda("subaru_outback_2015_generated")
@@ -55,8 +50,8 @@ class TestSubaruLegacySafety(common.PandaSafetyTest, common.DriverTorqueSteering
     return self.packer.make_can_msg_panda("Wheel_Speeds", 0, values)
 
   def _user_brake_msg(self, brake):
-    if brake > 0 and brake < BRAKE_THRESHOLD:
-      brake = BRAKE_THRESHOLD + 1
+    if brake > 0 and brake < self.BRAKE_THRESHOLD:
+      brake = self.BRAKE_THRESHOLD + 1
     values = {"Brake_Pedal": brake}
     return self.packer.make_can_msg_panda("Brake_Pedal", 0, values)
 
