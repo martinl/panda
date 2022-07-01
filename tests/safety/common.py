@@ -577,7 +577,7 @@ class PandaSafetyTest(PandaSafetyTestBase):
             # TODO: Temporary, should be fixed in panda firmware, safety_honda.h
             if attr.startswith('TestHonda'):
               # exceptions for common msgs across different hondas
-              tx = list(filter(lambda m: m[0] not in [0x1FA, 0x30C], tx))
+              tx = list(filter(lambda m: m[0] not in [0x1FA, 0x30C, 0x33D], tx))
             # TODO: Temporary, refactor subaru safety
             if attr in ['TestSubaruGen2Safety', 'TestSubaruCrosstrekHybridSafety', 'TestSubaruForesterHybridSafety', 'TestSubaruSafety']:
               tx = list(filter(lambda m: m[0] not in [0x122, 0x221, 0x321, 0x322, 0x40, 0x139], tx))
