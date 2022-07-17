@@ -4,15 +4,15 @@ from panda import Panda
 from panda.tests.safety import libpandasafety_py
 import panda.tests.safety.common as common
 from panda.tests.safety.common import CANPackerPanda
+from panda.tests.safety.test_hyundai import HyundaiButtonBase
 
+class TestHyundaiHDA2(HyundaiButtonBase, common.PandaSafetyTest, common.DriverTorqueSteeringSafetyTest):
 
-class TestHyundaiHDA2(common.PandaSafetyTest, common.DriverTorqueSteeringSafetyTest):
-
-  TX_MSGS = [[0x50, 0], [0x1CF, 1]]
+  TX_MSGS = [[0x50, 0], [0x1CF, 1], [0x2A4, 0]]
   STANDSTILL_THRESHOLD = 30  # ~1kph
   RELAY_MALFUNCTION_ADDR = 0x50
   RELAY_MALFUNCTION_BUS = 0
-  FWD_BLACKLISTED_ADDRS = {2: [0x50]}
+  FWD_BLACKLISTED_ADDRS = {2: [0x50, 0x2a4]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   MAX_RATE_UP = 3
@@ -55,21 +55,12 @@ class TestHyundaiHDA2(common.PandaSafetyTest, common.DriverTorqueSteeringSafetyT
     values = {"CRUISE_ACTIVE": enable}
     return self.packer.make_can_msg_panda("SCC1", 1, values, counter=True)
 
-  def _button_msg(self, resume=False, cancel=False):
+  def _button_msg(self, buttons, main_button=0):
     values = {
-      "DISTANCE_BTN": resume,
-      "PAUSE_RESUME_BTN": cancel,
+      "CRUISE_BUTTONS": buttons,
+      "ADAPTIVE_CRUISE_MAIN_BTN": main_button,
     }
-    return self.packer.make_can_msg_panda("CRUISE_BUTTONS", 1, values)
-
-  def test_buttons(self):
-    for controls_allowed in (True, False):
-      for cruise_engaged in (True, False):
-        self._rx(self._pcm_status_msg(cruise_engaged))
-        self.safety.set_controls_allowed(controls_allowed)
-
-        self.assertEqual(cruise_engaged, self._tx(self._button_msg(cancel=True)))
-        self.assertEqual(controls_allowed, self._tx(self._button_msg(resume=True)))
+    return self.packer.make_can_msg_panda("CRUISE_BUTTONS", 1, values, counter=True)
 
 
 if __name__ == "__main__":

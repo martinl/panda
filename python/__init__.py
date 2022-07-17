@@ -201,6 +201,8 @@ class Panda:
   FLAG_TESLA_POWERTRAIN = 1
   FLAG_TESLA_LONG_CONTROL = 2
 
+  FLAG_CHRYSLER_RAM_DT = 1
+
   def __init__(self, serial: Optional[str] = None, claim: bool = True):
     self._serial = serial
     self._handle = None
