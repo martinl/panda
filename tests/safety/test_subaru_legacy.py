@@ -24,7 +24,7 @@ class TestSubaruLegacySafety(common.PandaSafetyTest, common.DriverTorqueSteering
   MAX_RT_DELTA = 940
   RT_INTERVAL = 250000
 
-  DRIVER_TORQUE_ALLOWANCE = 75
+  DRIVER_TORQUE_ALLOWANCE = 60
   DRIVER_TORQUE_FACTOR = 10
 
   BRAKE_THRESHOLD = 2
@@ -74,7 +74,7 @@ class TestSubaruLegacy2019Safety(TestSubaruLegacySafety):
   def setUp(self):
     self.packer = CANPackerPanda("subaru_outback_2019_generated")
     self.safety = libpandasafety_py.libpandasafety
-    self.safety.set_safety_hooks(Panda.SAFETY_SUBARU_LEGACY, 1)
+    self.safety.set_safety_hooks(Panda.SAFETY_SUBARU_LEGACY, Panda.FLAG_SUBARU_LEGACY_FLIP_DRIVER_TORQUE)
     self.safety.init_tests()
 
 if __name__ == "__main__":

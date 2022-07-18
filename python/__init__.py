@@ -203,6 +203,8 @@ class Panda:
 
   FLAG_CHRYSLER_RAM_DT = 1
 
+  FLAG_SUBARU_LEGACY_FLIP_DRIVER_TORQUE = 1
+
   def __init__(self, serial: Optional[str] = None, claim: bool = True):
     self._serial = serial
     self._handle = None
