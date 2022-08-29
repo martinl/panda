@@ -176,7 +176,7 @@ static int subaru_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
   int bus_fwd = -1;
   int addr = GET_ADDR(to_fwd);
 
-  if (!subaru_gen2 && bus_num == 0) {
+  if ((!subaru_gen2) && (bus_num == 0)) {
     // Global platform
     // 0x40 Throttle
     // 0x139 Brake_Pedal
