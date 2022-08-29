@@ -92,13 +92,11 @@ class TestSubaruCrosstrekHybridSafety(TestSubaruSafety):
     return self.packer.make_can_msg_panda("Brake_Hybrid", 1, values)
 
   def _user_gas_msg(self, gas):
-    values = {"Throttle_Pedal": gas, "Counter": self.cnt_gas % 4}
-    self.__class__.cnt_gas += 1
+    values = {"Throttle_Pedal": gas}
     return self.packer.make_can_msg_panda("Throttle_Hybrid", 1, values)
 
   def _pcm_status_msg(self, enable):
-    values = {"Cruise_Activated": enable, "Counter": self.cnt_cruise % 4}
-    self.__class__.cnt_cruise += 1
+    values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_panda("ES_DashStatus", 2, values)
 
 class TestSubaruForesterHybridSafety(TestSubaruSafety):
@@ -110,8 +108,7 @@ class TestSubaruForesterHybridSafety(TestSubaruSafety):
     self.safety.init_tests()
 
   def _pcm_status_msg(self, enable):
-    values = {"Cruise_Activated": enable, "Counter": self.cnt_cruise % 4}
-    self.__class__.cnt_cruise += 1
+    values = {"Cruise_Activated": enable}
     return self.packer.make_can_msg_panda("ES_DashStatus", 2, values)
 
 
