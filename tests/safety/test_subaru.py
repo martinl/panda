@@ -77,33 +77,6 @@ class TestSubaruGen2Safety(TestSubaruSafety):
     self.safety.set_safety_hooks(Panda.SAFETY_SUBARU, Panda.FLAG_SUBARU_GEN2)
     self.safety.init_tests()
 
-class TestSubaruGen2Safety(TestSubaruSafety):
-  TX_MSGS = [[0x122, 0], [0x321, 0], [0x322, 0], [0x40, 2], [0x139, 2]]
-  FWD_BLACKLISTED_ADDRS = {0: [0x40, 0x139], 2: [0x122, 0x321, 0x322]}
-
-  def setUp(self):
-    self.packer = CANPackerPanda("subaru_global_2017_generated")
-    self.safety = libpandasafety_py.libpandasafety
-    self.safety.set_safety_hooks(Panda.SAFETY_SUBARU_GEN2, 0)
-    self.safety.init_tests()
-
-  def _speed_msg(self, speed):
-    # subaru safety doesn't use the scaled value, so undo the scaling
-    values = {s: speed * 0.057 for s in ["FR", "FL", "RR", "RL"]}
-    values["Counter"] = self.cnt_speed % 4
-    self.__class__.cnt_speed += 1
-    return self.packer.make_can_msg_panda("Wheel_Speeds", 1, values)
-
-  def _user_brake_msg(self, brake):
-    values = {"Brake": brake, "Counter": self.cnt_brake % 4}
-    self.__class__.cnt_brake += 1
-    return self.packer.make_can_msg_panda("Brake_Status", 1, values)
-
-  def _pcm_status_msg(self, enable):
-    values = {"Cruise_Activated": enable, "Counter": self.cnt_cruise % 4}
-    self.__class__.cnt_cruise += 1
-    return self.packer.make_can_msg_panda("CruiseControl", 1, values)
-
 class TestSubaruCrosstrekHybridSafety(TestSubaruSafety):
   TX_MSGS = [[0x122, 0], [0x321, 0], [0x322, 0], [0x40, 2], [0x139, 2]]
   FWD_BLACKLISTED_ADDRS = {0: [0x40, 0x139], 2: [0x122, 0x321, 0x322]}
