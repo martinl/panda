@@ -22,7 +22,7 @@ class TestSubaruLegacySafety(common.PandaSafetyTest, common.DriverTorqueSteering
   MAX_RT_DELTA = 940
   RT_INTERVAL = 250000
 
-  DRIVER_TORQUE_ALLOWANCE = 60
+  DRIVER_TORQUE_ALLOWANCE = 75
   DRIVER_TORQUE_FACTOR = 10
 
   BRAKE_THRESHOLD = 2
