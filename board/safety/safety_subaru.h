@@ -26,8 +26,8 @@ const CanMsg SUBARU_TX_MSGS[] = {
   {0x122, 0, 8},
   {0x221, 0, 8},
   {0x321, 0, 8},
-  {0x322, 0, 8}
-  {0x40,  2, 8}
+  {0x322, 0, 8},
+  {0x40,  2, 8},
   {0x139, 2, 8}
 };
 #define SUBARU_TX_MSGS_LEN (sizeof(SUBARU_TX_MSGS) / sizeof(SUBARU_TX_MSGS[0]))
@@ -176,7 +176,7 @@ static int subaru_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
   int bus_fwd = -1;
   int addr = GET_ADDR(to_fwd);
 
-  if (bus_num == 0) {
+  if (!subaru_gen2 && bus_num == 0) {
     // Global platform
     // 0x40 Throttle
     // 0x139 Brake_Pedal
@@ -213,50 +213,12 @@ static int subaru_crosstrek_hybrid_tx_hook(CANPacket_t *to_send, bool longitudin
   // steer cmd checks
   if (addr == 0x122) {
     int desired_torque = ((GET_BYTES_04(to_send) >> 16) & 0x1FFFU);
-    bool violation = 0;
-    uint32_t ts = microsecond_timer_get();
-
     desired_torque = -1 * to_signed(desired_torque, 13);
 
-    if (controls_allowed) {
-
-      // *** global torque limit check ***
-      violation |= max_limit_check(desired_torque, SUBARU_MAX_STEER, -SUBARU_MAX_STEER);
-
-      // *** torque rate limit check ***
-      violation |= driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
-        SUBARU_MAX_STEER, SUBARU_MAX_RATE_UP, SUBARU_MAX_RATE_DOWN,
-        SUBARU_DRIVER_TORQUE_ALLOWANCE, SUBARU_DRIVER_TORQUE_FACTOR);
-
-      // used next time
-      desired_torque_last = desired_torque;
-
-      // *** torque real time rate limit check ***
-      violation |= rt_rate_limit_check(desired_torque, rt_torque_last, SUBARU_MAX_RT_DELTA);
-
-      // every RT_INTERVAL set the new limits
-      uint32_t ts_elapsed = get_ts_elapsed(ts, ts_last);
-      if (ts_elapsed > SUBARU_RT_INTERVAL) {
-        rt_torque_last = desired_torque;
-        ts_last = ts;
-      }
-    }
-
-    // no torque if controls is not allowed
-    if (!controls_allowed && (desired_torque != 0)) {
-      violation = 1;
-    }
-    // reset to 0 if either controls is not allowed or there's a violation
-    if (violation || !controls_allowed) {
-      desired_torque_last = 0;
-      rt_torque_last = 0;
-      ts_last = ts;
-    }
-
-    if (violation) {
+    const SteeringLimits limits = SUBARU_STEERING_LIMITS;
+    if (steer_torque_cmd_checks(desired_torque, -1, limits)) {
       tx = 0;
     }
-
   }
   return tx;
 }
