@@ -22,8 +22,6 @@ def is_steering_msg(mode, addr):
     ret = addr == 0x292
   elif mode == Panda.SAFETY_SUBARU:
     ret = addr == 0x122
-  elif mode == Panda.SAFETY_SUBARU_GEN2:
-    ret = addr == 0x122
   elif mode == Panda.SAFETY_SUBARU_LEGACY:
     ret = addr == 0x164
   return ret
@@ -45,9 +43,6 @@ def get_steer_torque(mode, to_send):
   elif mode == Panda.SAFETY_SUBARU:
     ret = ((to_send.RDLR >> 16) & 0x1FFF)
     ret = to_signed(ret, 13)
-  elif mode == Panda.SAFETY_SUBARU_GEN2:
-    ret = ((to_send.RDLR >> 16) & 0x1FFF)
-    ret = to_signed(ret, 13)
   elif mode == Panda.SAFETY_SUBARU_LEGACY:
     ret = ((to_send.RDLR >> 8) & 0x1FFF)
     ret = to_signed(ret, 13)
@@ -66,8 +61,6 @@ def set_desired_torque_last(safety, mode, torque):
     safety.set_chrysler_desired_torque_last(torque)
   elif mode == Panda.SAFETY_SUBARU:
     safety.set_subaru_desired_torque_last(torque)
-  elif mode == Panda.SAFETY_SUBARU_GEN2:
-    safety.set_subaru_gen2_desired_torque_last(torque)
   elif mode == Panda.SAFETY_SUBARU_LEGACY:
     safety.set_subaru_legacy_desired_torque_last(torque)
 
