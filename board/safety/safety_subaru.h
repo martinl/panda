@@ -221,7 +221,8 @@ static int subaru_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
     // 0x221 ES_Distance
     // 0x321 ES_DashStatus
     // 0x322 ES_LKAS_State
-    bool block_lkas = ((addr == 0x122) || (addr == 0x221) || (addr == 0x321) || (addr == 0x322));
+    bool block_lkas = subaru_crosstrek_hybrid ? (addr == 0x122) || (addr == 0x321) || (addr == 0x322)
+                                              : (addr == 0x122) || (addr == 0x221) || (addr == 0x321) || (addr == 0x322);
     if (!block_lkas) {
       bus_fwd = 0;  // Main CAN
     }
