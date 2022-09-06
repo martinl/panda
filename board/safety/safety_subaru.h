@@ -204,7 +204,7 @@ static int subaru_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
     // Global platform
     // 0x40 Throttle
     // 0x139 Brake_Pedal
-    bool block_msg = subaru_gen2 ? false : ((addr == 0x40) || (addr == 0x139));
+    bool block_msg = (subaru_gen2 || subaru_crosstrek_hybrid) ? false : ((addr == 0x40) || (addr == 0x139));
     if (!block_msg) {
       bus_fwd = 2; // forward to camera
     }
