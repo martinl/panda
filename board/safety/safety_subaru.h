@@ -55,7 +55,6 @@ AddrCheckStruct subaru_addr_checks[] = {
   {.msg = {{0x240, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 50000U}, { 0 }, { 0 }}},
 };
 #define SUBARU_ADDR_CHECK_LEN (sizeof(subaru_addr_checks) / sizeof(subaru_addr_checks[0]))
-addr_checks subaru_rx_checks = {subaru_addr_checks, SUBARU_ADDR_CHECK_LEN};
 
 AddrCheckStruct subaru_gen2_addr_checks[] = {
   {.msg = {{ 0x40, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 10000U}, { 0 }, { 0 }}},
@@ -65,7 +64,6 @@ AddrCheckStruct subaru_gen2_addr_checks[] = {
   {.msg = {{0x240, 1, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 50000U}, { 0 }, { 0 }}},
 };
 #define SUBARU_GEN2_ADDR_CHECK_LEN (sizeof(subaru_gen2_addr_checks) / sizeof(subaru_gen2_addr_checks[0]))
-addr_checks subaru_gen2_rx_checks = {subaru_gen2_addr_checks, SUBARU_GEN2_ADDR_CHECK_LEN};
 
 AddrCheckStruct subaru_crosstrek_hybrid_addr_checks[] = {
   {.msg = {{0x119, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep =  20000U}, { 0 }, { 0 }}},
@@ -76,7 +74,6 @@ AddrCheckStruct subaru_crosstrek_hybrid_addr_checks[] = {
   {.msg = {{0x321, 2, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 100000U}, { 0 }, { 0 }}},
 };
 #define SUBARU_CROSSTREK_HYBRID_ADDR_CHECK_LEN (sizeof(subaru_crosstrek_hybrid_addr_checks) / sizeof(subaru_crosstrek_hybrid_addr_checks[0]))
-addr_checks subaru_crosstrek_hybrid_rx_checks = {subaru_crosstrek_hybrid_addr_checks, SUBARU_CROSSTREK_HYBRID_ADDR_CHECK_LEN};
 
 AddrCheckStruct subaru_forester_hybrid_addr_checks[] = {
   {.msg = {{ 0x40, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 10000U}, { 0 }, { 0 }}},
@@ -86,12 +83,13 @@ AddrCheckStruct subaru_forester_hybrid_addr_checks[] = {
   {.msg = {{0x321, 2, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 100000U}, { 0 }, { 0 }}},
 };
 #define SUBARU_FORESTER_HYBRID_ADDR_CHECK_LEN (sizeof(subaru_forester_hybrid_addr_checks) / sizeof(subaru_forester_hybrid_addr_checks[0]))
-addr_checks subaru_forester_hybrid_rx_checks = {subaru_forester_hybrid_addr_checks, SUBARU_FORESTER_HYBRID_ADDR_CHECK_LEN};
 
 const uint16_t SUBARU_PARAM_GEN2 = 1;
 const uint16_t SUBARU_PARAM_CROSSTREK_HYBRID = 2;
+const uint16_t SUBARU_PARAM_FORESTER_HYBRID = 3;
 bool subaru_gen2 = false;
 bool subaru_crosstrek_hybrid = false;
+bool subaru_forester_hybrid = false;
 
 
 static uint32_t subaru_get_checksum(CANPacket_t *to_push) {
@@ -130,13 +128,13 @@ static int subaru_rx_hook(CANPacket_t *to_push) {
     }
 
     // enter controls on rising edge of ACC, exit controls on ACC off
-    if ((addr == 0x240) && (bus == alt_bus) && !subaru_crosstrek_hybrid) {
+    if ((addr == 0x240) && (bus == alt_bus) && (!subaru_crosstrek_hybrid || !subaru_forester_hybrid) {
       bool cruise_engaged = GET_BIT(to_push, 41U) != 0U;
       pcm_cruise_check(cruise_engaged);
     }
 
     // enter controls on rising edge of ACC, exit controls on ACC off (ES_DashStatus)
-    if ((addr == 0x321) && (bus == 2) && subaru_crosstrek_hybrid) {
+    if ((addr == 0x321) && (bus == 2) && (subaru_crosstrek_hybrid || subaru_forester_hybrid)) {
       int cruise_engaged = ((GET_BYTES_48(to_push) >> 4) & 1U);
       pcm_cruise_check(cruise_engaged);
     }
@@ -203,16 +201,12 @@ static int subaru_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
   int addr = GET_ADDR(to_fwd);
 
   if (bus_num == 0) {
-    if (!subaru_gen2) {
-      // Global platform
-      // 0x40 Throttle
-      // 0x139 Brake_Pedal
-      bool block_msg = ((addr == 0x40) || (addr == 0x139));
-      if (!block_msg) {
-        bus_fwd = 2;  // Camera CAN
-      }
-    } else {
-      bus_fwd = 2;
+    // Global platform
+    // 0x40 Throttle
+    // 0x139 Brake_Pedal
+    bool block_msg = subaru_gen2 ? false : ((addr == 0x40) || (addr == 0x139));
+    if (!block_msg) {
+      bus_fwd = 2; // forward to camera
     }
   }
   if (bus_num == 2) {
@@ -221,8 +215,9 @@ static int subaru_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
     // 0x221 ES_Distance
     // 0x321 ES_DashStatus
     // 0x322 ES_LKAS_State
-    bool block_lkas = subaru_crosstrek_hybrid ? (addr == 0x122) || (addr == 0x321) || (addr == 0x322)
-                                              : (addr == 0x122) || (addr == 0x221) || (addr == 0x321) || (addr == 0x322);
+    bool block_lkas = (subaru_crosstrek_hybrid || subaru_forester_hybrid) ?
+                      (addr == 0x122) || (addr == 0x321) || (addr == 0x322) :
+                      (addr == 0x122) || (addr == 0x221) || (addr == 0x321) || (addr == 0x322);
     if (!block_lkas) {
       bus_fwd = 0;  // Main CAN
     }
@@ -231,66 +226,17 @@ static int subaru_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
   return bus_fwd;
 }
 
-
-// forester hybrid
-static int subaru_forester_hybrid_rx_hook(CANPacket_t *to_push) {
-
-  bool valid = addr_safety_check(to_push, &subaru_forester_hybrid_rx_checks,
-                            subaru_get_checksum, subaru_compute_checksum, subaru_get_counter);
-  int addr = GET_ADDR(to_push);
-  uint8_t bus = GET_BUS(to_push);
-
-  if (valid && (bus == 0U)) {
-    if (addr == 0x119) {
-      int torque_driver_new;
-      torque_driver_new = ((GET_BYTES_04(to_push) >> 16) & 0x7FFU);
-      torque_driver_new = -1 * to_signed(torque_driver_new, 11);
-      update_sample(&torque_driver, torque_driver_new);
-    }
-  }
-  if (valid && (bus == 2U)) {
-    // enter controls on rising edge of ACC, exit controls on ACC off (ES_DashStatus)
-    if (addr == 0x321) {
-      int cruise_engaged = ((GET_BYTES_48(to_push) >> 4) & 1U);
-      if (cruise_engaged && !cruise_engaged_prev) {
-        controls_allowed = 1;
-      }
-      if (!cruise_engaged) {
-        controls_allowed = 0;
-      }
-      cruise_engaged_prev = cruise_engaged;
-    }
-  }
-  if (valid && (bus == 0U)) {
-    // sample wheel speed, averaging opposite corners
-    if (addr == 0x13a) {
-      int subaru_speed = ((GET_BYTES_04(to_push) >> 12) & 0x1FFFU) + ((GET_BYTES_48(to_push) >> 6) & 0x1FFFU);  // FR + RL
-      subaru_speed /= 2;
-      vehicle_moving = subaru_speed > SUBARU_STANDSTILL_THRSLD;
-    }
-
-    if (addr == 0x13c) {
-      brake_pressed = ((GET_BYTE(to_push, 7) >> 6) & 1U);
-    }
-
-    if (addr == 0x40) {
-      gas_pressed = GET_BYTE(to_push, 4) != 0U;
-    }
-
-    generic_rx_checks((addr == 0x122));
-  }
-  return valid;
-}
-
-
 static const addr_checks* subaru_init(uint16_t param) {
   subaru_gen2 = GET_FLAG(param, SUBARU_PARAM_GEN2);
   subaru_crosstrek_hybrid = GET_FLAG(param, SUBARU_PARAM_CROSSTREK_HYBRID);
+  subaru_forester_hybrid = GET_FLAG(param, SUBARU_PARAM_FORESTER_HYBRID);
 
   if (subaru_gen2) {
     subaru_rx_checks = (addr_checks){subaru_gen2_addr_checks, SUBARU_GEN2_ADDR_CHECK_LEN};
   } else if (subaru_crosstrek_hybrid) {
     subaru_rx_checks = (addr_checks){subaru_crosstrek_hybrid_addr_checks, SUBARU_CROSSTREK_HYBRID_ADDR_CHECK_LEN};
+  } else if (subaru_forester_hybrid) {
+    subaru_rx_checks = (addr_checks){subaru_forester_hybrid_addr_checks, SUBARU_FORESTER_HYBRID_ADDR_CHECK_LEN};
   } else {
     subaru_rx_checks = (addr_checks){subaru_addr_checks, SUBARU_ADDR_CHECK_LEN};
   }
@@ -298,23 +244,9 @@ static const addr_checks* subaru_init(uint16_t param) {
   return &subaru_rx_checks;
 }
 
-static const addr_checks* subaru_forester_hybrid_init(uint16_t param) {
-  UNUSED(param);
-  return &subaru_forester_hybrid_rx_checks;
-}
-
-
 const safety_hooks subaru_hooks = {
   .init = subaru_init,
   .rx = subaru_rx_hook,
-  .tx = subaru_tx_hook,
-  .tx_lin = nooutput_tx_lin_hook,
-  .fwd = subaru_fwd_hook,
-};
-
-const safety_hooks subaru_forester_hybrid_hooks = {
-  .init = subaru_forester_hybrid_init,
-  .rx = subaru_forester_hybrid_rx_hook,
   .tx = subaru_tx_hook,
   .tx_lin = nooutput_tx_lin_hook,
   .fwd = subaru_fwd_hook,

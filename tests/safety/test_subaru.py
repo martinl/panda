@@ -105,7 +105,7 @@ class TestSubaruForesterHybridSafety(TestSubaruSafety):
   def setUp(self):
     self.packer = CANPackerPanda("subaru_global_2017_generated")
     self.safety = libpandasafety_py.libpandasafety
-    self.safety.set_safety_hooks(Panda.SAFETY_SUBARU_FORESTER_HYBRID, 0)
+    self.safety.set_safety_hooks(Panda.SAFETY_SUBARU, Panda.FLAG_SUBARU_FORESTER_HYBRID)
     self.safety.init_tests()
 
   def _pcm_status_msg(self, enable):
