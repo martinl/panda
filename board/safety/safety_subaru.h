@@ -1,3 +1,4 @@
+#include <stdio.h>
 const SteeringLimits SUBARU_STEERING_LIMITS = {
   .max_steer = 2047,
   .max_rt_delta = 940,
@@ -135,6 +136,7 @@ static int subaru_rx_hook(CANPacket_t *to_push) {
     }
 
     if ((addr == 0x321) && (bus == 2) && (subaru_crosstrek_hybrid || subaru_forester_hybrid)) {
+      printf("forester_hybrid 0x321\n");
       bool cruise_engaged = ((GET_BYTES_48(to_push) >> 4) & 1U);
       pcm_cruise_check(cruise_engaged);
     }
@@ -233,16 +235,16 @@ static const addr_checks* subaru_init(uint16_t param) {
 
   if (subaru_gen2) {
     subaru_rx_checks = (addr_checks){subaru_gen2_addr_checks, SUBARU_GEN2_ADDR_CHECK_LEN};
-    printf("subaru_gen2");
+    printf("subaru_gen2\n");
   } else if (subaru_crosstrek_hybrid) {
     subaru_rx_checks = (addr_checks){subaru_crosstrek_hybrid_addr_checks, SUBARU_CROSSTREK_HYBRID_ADDR_CHECK_LEN};
-    printf("subaru_crosstrek_hybrid");
+    printf("subaru_crosstrek_hybrid\n");
   } else if (subaru_forester_hybrid) {
     subaru_rx_checks = (addr_checks){subaru_forester_hybrid_addr_checks, SUBARU_FORESTER_HYBRID_ADDR_CHECK_LEN};
-    printf("subaru_forester_hybrid");
+    printf("subaru_forester_hybrid\n");
   } else {
     subaru_rx_checks = (addr_checks){subaru_addr_checks, SUBARU_ADDR_CHECK_LEN};
-    printf("subaru_global");
+    printf("subaru_global\n");
   }
 
   return &subaru_rx_checks;
