@@ -129,7 +129,7 @@ static int subaru_rx_hook(CANPacket_t *to_push) {
     }
 
     // enter controls on rising edge of ACC, exit controls on ACC off
-    if ((addr == 0x240) && (bus == alt_bus) && (!subaru_crosstrek_hybrid || !subaru_forester_hybrid)) {
+    if ((addr == 0x240) && (bus == alt_bus) && !subaru_crosstrek_hybrid && !subaru_forester_hybrid) {
       bool cruise_engaged = GET_BIT(to_push, 41U) != 0U;
       pcm_cruise_check(cruise_engaged);
     }
