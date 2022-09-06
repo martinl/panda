@@ -170,7 +170,7 @@ SECTIONS
   } >DTCMRAM
 
   /* User_heap_stack section, used to check that there is enough RAM left */
-  ._user_heap_stack (NOLOAD) :
+  ._user_heap_stack :
   {
     . = ALIGN(8);
     PROVIDE ( end = . );
