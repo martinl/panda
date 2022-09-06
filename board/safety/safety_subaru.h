@@ -178,7 +178,7 @@ static int subaru_tx_hook(CANPacket_t *to_send, bool longitudinal_allowed) {
 
   if (subaru_gen2) {
     tx = msg_allowed(to_send, SUBARU_GEN2_TX_MSGS, SUBARU_GEN2_TX_MSGS_LEN);
-  else if (subaru_crosstrek_hybrid) {
+  } else if (subaru_crosstrek_hybrid) {
     tx = msg_allowed(to_send, SUBARU_CROSSTREK_HYBRID_TX_MSGS, SUBARU_CROSSTREK_HYBRID_TX_MSGS_LEN);
   } else {
     tx = msg_allowed(to_send, SUBARU_TX_MSGS, SUBARU_TX_MSGS_LEN);
@@ -288,7 +288,7 @@ static const addr_checks* subaru_init(uint16_t param) {
 
   if (subaru_gen2) {
     subaru_rx_checks = (addr_checks){subaru_gen2_addr_checks, SUBARU_GEN2_ADDR_CHECK_LEN};
-  else if (subaru_crosstrek_hybrid) {
+  } else if (subaru_crosstrek_hybrid) {
     subaru_rx_checks = (addr_checks){subaru_crosstrek_hybrid_addr_checks, SUBARU_CROSSTREK_HYBRID_ADDR_CHECK_LEN};
   } else {
     subaru_rx_checks = (addr_checks){subaru_addr_checks, SUBARU_ADDR_CHECK_LEN};
