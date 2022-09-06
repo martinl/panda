@@ -233,12 +233,16 @@ static const addr_checks* subaru_init(uint16_t param) {
 
   if (subaru_gen2) {
     subaru_rx_checks = (addr_checks){subaru_gen2_addr_checks, SUBARU_GEN2_ADDR_CHECK_LEN};
+    printf("subaru_gen2");
   } else if (subaru_crosstrek_hybrid) {
     subaru_rx_checks = (addr_checks){subaru_crosstrek_hybrid_addr_checks, SUBARU_CROSSTREK_HYBRID_ADDR_CHECK_LEN};
+    printf("subaru_crosstrek_hybrid");
   } else if (subaru_forester_hybrid) {
     subaru_rx_checks = (addr_checks){subaru_forester_hybrid_addr_checks, SUBARU_FORESTER_HYBRID_ADDR_CHECK_LEN};
+    printf("subaru_forester_hybrid");
   } else {
     subaru_rx_checks = (addr_checks){subaru_addr_checks, SUBARU_ADDR_CHECK_LEN};
+    printf("subaru_global");
   }
 
   return &subaru_rx_checks;
