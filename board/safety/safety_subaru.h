@@ -40,6 +40,13 @@ const CanMsg SUBARU_GEN2_TX_MSGS[] = {
 };
 #define SUBARU_GEN2_TX_MSGS_LEN (sizeof(SUBARU_GEN2_TX_MSGS) / sizeof(SUBARU_GEN2_TX_MSGS[0]))
 
+const CanMsg SUBARU_CROSSTREK_HYBRID_TX_MSGS[] = {
+  {0x122, 0, 8},
+  {0x321, 0, 8},
+  {0x322, 0, 8}
+};
+#define SUBARU_CROSSTREK_HYBRID_TX_MSGS_LEN (sizeof(SUBARU_CROSSTREK_HYBRID_TX_MSGS) / sizeof(SUBARU_CROSSTREK_HYBRID_TX_MSGS[0]))
+
 AddrCheckStruct subaru_addr_checks[] = {
   {.msg = {{ 0x40, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 10000U}, { 0 }, { 0 }}},
   {.msg = {{0x119, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 20000U}, { 0 }, { 0 }}},
@@ -176,13 +183,17 @@ static int subaru_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
   int bus_fwd = -1;
   int addr = GET_ADDR(to_fwd);
 
-  if ((!subaru_gen2) && (bus_num == 0)) {
-    // Global platform
-    // 0x40 Throttle
-    // 0x139 Brake_Pedal
-    int block_msg = ((addr == 0x40) || (addr == 0x139));
-    if (!block_msg) {
-      bus_fwd = 2;  // Camera CAN
+  if (bus_num == 0) {
+    if (!subaru_gen2) {
+      // Global platform
+      // 0x40 Throttle
+      // 0x139 Brake_Pedal
+      bool block_msg = ((addr == 0x40) || (addr == 0x139));
+      if (!block_msg) {
+        bus_fwd = 2;  // Camera CAN
+      }
+    } else {
+      bus_fwd = 2;
     }
   }
   if (bus_num == 2) {
@@ -191,8 +202,8 @@ static int subaru_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
     // 0x221 ES_Distance
     // 0x321 ES_DashStatus
     // 0x322 ES_LKAS_State
-    int block_msg = ((addr == 0x122) || (addr == 0x221) || (addr == 0x321) || (addr == 0x322));
-    if (!block_msg) {
+    bool block_lkas = ((addr == 0x122) || (addr == 0x221) || (addr == 0x321) || (addr == 0x322));
+    if (!block_lkas) {
       bus_fwd = 0;  // Main CAN
     }
   }
@@ -200,13 +211,14 @@ static int subaru_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
   return bus_fwd;
 }
 
+// crosstrek hybrid
 static int subaru_crosstrek_hybrid_tx_hook(CANPacket_t *to_send, bool longitudinal_allowed) {
   UNUSED(longitudinal_allowed);
 
   int tx = 1;
   int addr = GET_ADDR(to_send);
 
-  if (!msg_allowed(to_send, SUBARU_GEN2_TX_MSGS, SUBARU_GEN2_TX_MSGS_LEN)) {
+  if (!msg_allowed(to_send, SUBARU_CROSSTREK_HYBRID_TX_MSGS, SUBARU_CROSSTREK_HYBRID_TX_MSGS_LEN)) {
     tx = 0;
   }
 
@@ -224,7 +236,6 @@ static int subaru_crosstrek_hybrid_tx_hook(CANPacket_t *to_send, bool longitudin
 }
 
 
-// crosstrek hybrid
 static int subaru_crosstrek_hybrid_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
   int bus_fwd = -1;
   int addr = GET_ADDR(to_fwd);
@@ -233,7 +244,7 @@ static int subaru_crosstrek_hybrid_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
     // Global platform
     // 0x40 Throttle
     // 0x139 Brake_Pedal
-    int block_msg = ((addr == 0x40) || (addr == 0x139));
+    bool block_msg = ((addr == 0x40) || (addr == 0x139));
     if (!block_msg) {
       bus_fwd = 2;  // Camera CAN
     }
@@ -243,8 +254,8 @@ static int subaru_crosstrek_hybrid_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
     // 0x122 ES_LKAS
     // 0x321 ES_DashStatus
     // 0x322 ES_LKAS_State
-    int block_msg = ((addr == 0x122) || (addr == 0x321) || (addr == 0x322));
-    if (!block_msg) {
+    bool block_lkas = ((addr == 0x122) || (addr == 0x321) || (addr == 0x322));
+    if (!block_lkas) {
       bus_fwd = 0;  // Main CAN
     }
   }
