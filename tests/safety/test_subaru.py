@@ -65,6 +65,7 @@ class TestSubaruSafety(common.PandaSafetyTest, common.DriverTorqueSteeringSafety
 
 class TestSubaruGen2Safety(TestSubaruSafety):
   TX_MSGS = [[0x122, 0], [0x221, 1], [0x321, 0], [0x322, 0]]
+  FWD_BLACKLISTED_ADDRS = {2: [0x122, 0x221, 0x321, 0x322]}
   ALT_BUS = 1
 
   MAX_RATE_UP = 40
