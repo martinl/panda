@@ -54,7 +54,6 @@
 #define SAFETY_FAW 26U
 #define SAFETY_BODY 27U
 #define SAFETY_HYUNDAI_CANFD 28U
-#define SAFETY_SUBARU_CROSSTREK_HYBRID 29U
 #define SAFETY_SUBARU_FORESTER_HYBRID 30U
 
 uint16_t current_safety_mode = SAFETY_SILENT;
@@ -283,7 +282,6 @@ const safety_hook_config safety_hook_registry[] = {
   {SAFETY_HYUNDAI, &hyundai_hooks},
   {SAFETY_CHRYSLER, &chrysler_hooks},
   {SAFETY_SUBARU, &subaru_hooks},
-  {SAFETY_SUBARU_CROSSTREK_HYBRID, &subaru_crosstrek_hybrid_hooks},
   {SAFETY_SUBARU_FORESTER_HYBRID, &subaru_forester_hybrid_hooks},
   {SAFETY_VOLKSWAGEN_MQB, &volkswagen_mqb_hooks},
   {SAFETY_NISSAN, &nissan_hooks},

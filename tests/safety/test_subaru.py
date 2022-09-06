@@ -85,7 +85,7 @@ class TestSubaruCrosstrekHybridSafety(TestSubaruSafety):
   def setUp(self):
     self.packer = CANPackerPanda("subaru_global_2020_hybrid_generated")
     self.safety = libpandasafety_py.libpandasafety
-    self.safety.set_safety_hooks(Panda.SAFETY_SUBARU_CROSSTREK_HYBRID, 0)
+    self.safety.set_safety_hooks(Panda.SAFETY_SUBARU, Panda.FLAG_SUBARU_CROSSTREK_HYBRID)
     self.safety.init_tests()
 
   def _user_brake_msg(self, brake):
