@@ -55,6 +55,7 @@ AddrCheckStruct subaru_addr_checks[] = {
   {.msg = {{0x240, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 50000U}, { 0 }, { 0 }}},
 };
 #define SUBARU_ADDR_CHECK_LEN (sizeof(subaru_addr_checks) / sizeof(subaru_addr_checks[0]))
+addr_checks subaru_rx_checks = {subaru_addr_checks, SUBARU_ADDR_CHECK_LEN};
 
 AddrCheckStruct subaru_gen2_addr_checks[] = {
   {.msg = {{ 0x40, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 10000U}, { 0 }, { 0 }}},
@@ -128,7 +129,7 @@ static int subaru_rx_hook(CANPacket_t *to_push) {
     }
 
     // enter controls on rising edge of ACC, exit controls on ACC off
-    if ((addr == 0x240) && (bus == alt_bus) && (!subaru_crosstrek_hybrid || !subaru_forester_hybrid) {
+    if ((addr == 0x240) && (bus == alt_bus) && (!subaru_crosstrek_hybrid || !subaru_forester_hybrid)) {
       bool cruise_engaged = GET_BIT(to_push, 41U) != 0U;
       pcm_cruise_check(cruise_engaged);
     }
