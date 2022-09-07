@@ -204,7 +204,7 @@ static int subaru_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
     // Global platform
     // 0x40 Throttle
     // 0x139 Brake_Pedal
-    bool block_msg = (subaru_gen2 || subaru_crosstrek_hybrid) ? false : ((addr == 0x40) || (addr == 0x139));
+    bool block_msg = (subaru_gen2 || subaru_crosstrek_hybrid) ? false : (addr == 0x40) || (addr == 0x139);
     if (!block_msg) {
       bus_fwd = 2; // forward to camera
     }
@@ -212,12 +212,9 @@ static int subaru_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
   if (bus_num == 2) {
     // Global platform
     // 0x122 ES_LKAS
-    // 0x221 ES_Distance
     // 0x321 ES_DashStatus
     // 0x322 ES_LKAS_State
-    bool block_lkas = (subaru_gen2 || subaru_crosstrek_hybrid ) ?
-                      (addr == 0x122) || (addr == 0x321) || (addr == 0x322) :
-                      (addr == 0x122) || (addr == 0x221) || (addr == 0x321) || (addr == 0x322);
+    bool block_lkas = (addr == 0x122) || (addr == 0x321) || (addr == 0x322);
     if (!block_lkas) {
       bus_fwd = 0;  // Main CAN
     }
