@@ -87,7 +87,7 @@ AddrCheckStruct subaru_forester_hybrid_addr_checks[] = {
 
 const uint16_t SUBARU_PARAM_GEN2 = 1;
 const uint16_t SUBARU_PARAM_CROSSTREK_HYBRID = 2;
-const uint16_t SUBARU_PARAM_FORESTER_HYBRID = 3;
+const uint16_t SUBARU_PARAM_FORESTER_HYBRID = 4;
 bool subaru_gen2 = false;
 bool subaru_crosstrek_hybrid = false;
 bool subaru_forester_hybrid = false;
