@@ -16,7 +16,7 @@ class TestSubaruSafety(common.PandaSafetyTest, common.DriverTorqueSteeringSafety
 
   MAX_RATE_UP = 50
   MAX_RATE_DOWN = 70
-  MAX_TORQUE = 2047
+  MAX_TORQUE = 3071
 
   MAX_RT_DELTA = 940
   RT_INTERVAL = 250000
