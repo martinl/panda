@@ -6,7 +6,7 @@ from panda.tests.safety import libpandasafety_py
 import panda.tests.safety.common as common
 from panda.tests.safety.common import CANPackerPanda, ALTERNATIVE_EXPERIENCE
 
-MAX_BRAKE = 350
+MAX_BRAKE = 400
 MAX_GAS = 3072
 MAX_REGEN = 1404
 
@@ -57,6 +57,10 @@ class TestGmSafetyBase(common.PandaSafetyTest, common.DriverTorqueSteeringSafety
     # GM safety has a brake threshold of 10
     values = {"BrakePedalPosition": 10 if brake else 0}
     return self.packer.make_can_msg_panda("EBCMBrakePedalPosition", 0, values)
+
+  def _user_regen_msg(self, regen):
+    values = {"RegenPaddle": 2 if regen else 0}
+    return self.packer.make_can_msg_panda("EBCMRegenPaddle", 0, values)
 
   def _user_gas_msg(self, gas):
     values = {"AcceleratorPedal2": 1 if gas else 0}
