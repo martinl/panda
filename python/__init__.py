@@ -231,6 +231,7 @@ class Panda:
   FLAG_SUBARU_LEGACY_FLIP_DRIVER_TORQUE = 1
 
   FLAG_GM_HW_CAM = 1
+  FLAG_GM_HW_CAM_LONG = 2
 
   def __init__(self, serial: Optional[str] = None, claim: bool = True, disable_checks: bool = True):
     self._serial = serial
