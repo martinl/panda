@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     opencl-headers \
     ocl-icd-opencl-dev \
     qt5-qmake \
+    qt5-default \
     make \
     patch \
     pkg-config \
