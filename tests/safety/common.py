@@ -734,7 +734,8 @@ class PandaSafetyTest(PandaSafetyTestBase):
               # exceptions for common msgs across different hondas
               tx = list(filter(lambda m: m[0] not in [0x1FA, 0x30C, 0x33D], tx))
             # TODO: Temporary, refactor subaru safety
-            if attr in ['TestSubaruGen2Safety', 'TestSubaruCrosstrekHybridSafety', 'TestSubaruForesterHybridSafety', 'TestSubaruForester2022Safety', 'TestSubaruSafety']:
+            if attr in ['TestSubaruGen2Safety', 'TestSubaruCrosstrekHybridSafety', 'TestSubaruForesterHybridSafety',
+                        'TestSubaruForester2022Safety', 'TestSubaruSafety']:
               tx = list(filter(lambda m: m[0] not in [0x122, 0x221, 0x321, 0x322, 0x40, 0x139, 0x124], tx))
             if attr in ['TestSubaruLegacySafety', 'TestSubaruLegacy2019Safety']:
               tx = list(filter(lambda m: m[0] not in [0x161, 0x164, 0x140], tx))
