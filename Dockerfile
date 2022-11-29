@@ -65,7 +65,7 @@ RUN /tmp/install.sh
 
 RUN git config --global --add safe.directory /tmp/openpilot/panda
 RUN cd /tmp && \
-    git clone https://github.com/commaai/openpilot.git tmppilot || true && \
+    git clone https://github.com/martinl/openpilot.git tmppilot || true && \
     cd /tmp/tmppilot && \
     git fetch origin $OPENPILOT_REF && \
     git checkout $OPENPILOT_REF && \
