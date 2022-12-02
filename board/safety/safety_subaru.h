@@ -235,9 +235,11 @@ static int subaru_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
   if (bus_num == 2) {
     // Global platform
     // 0x122 ES_LKAS
+    // 0x124 ES_LKAS
     // 0x321 ES_DashStatus
     // 0x322 ES_LKAS_State
-    bool block_lkas = (addr == 0x122) || (addr == 0x321) || (addr == 0x322);
+    int lkas_msg = subaru_forester_2022 ? 0x124 : 0x122;
+    bool block_lkas = (addr == lkas_msg) || (addr == 0x321) || (addr == 0x322);
     if (!block_lkas) {
       bus_fwd = 0;  // Main CAN
     }
