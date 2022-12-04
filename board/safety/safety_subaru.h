@@ -129,7 +129,7 @@ static int subaru_rx_hook(CANPacket_t *to_push) {
   if (valid) {
     const int bus = GET_BUS(to_push);
     const int alt_bus = subaru_gen2 ? 1 : 0;
-    const int gen_rx = subaru_forester_2022 ? 0x124 : 0x122;
+    const int stock_ecu = subaru_forester_2022 ? 0x124 : 0x122;
 
     int addr = GET_ADDR(to_push);
     if ((addr == 0x119) && (bus == 0)) {
@@ -172,7 +172,7 @@ static int subaru_rx_hook(CANPacket_t *to_push) {
     if ((addr == 0x168) && (bus == 1) && subaru_crosstrek_hybrid) {
       gas_pressed = GET_BYTE(to_push, 4) != 0U;
     }
-    generic_rx_checks((addr == gen_rx) && (bus == 0));
+    generic_rx_checks((addr == stock_ecu) && (bus == 0));
   }
   return valid;
 }
@@ -235,7 +235,7 @@ static int subaru_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
   if (bus_num == 2) {
     // Global platform
     // 0x122 ES_LKAS
-    // 0x124 ES_LKAS
+    // 0x124 ES_LKAS_2
     // 0x321 ES_DashStatus
     // 0x322 ES_LKAS_State
     int lkas_msg = subaru_forester_2022 ? 0x124 : 0x122;
