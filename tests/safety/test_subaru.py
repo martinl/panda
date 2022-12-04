@@ -118,7 +118,7 @@ class TestSubaruForester2022Safety(TestSubaruSafety):
   FWD_BLACKLISTED_ADDRS = {0: [0x40, 0x139], 2: [0x124, 0x321, 0x322]}
 
   def setUp(self):
-    self.packer = CANPackerPanda("subaru_forester_2022_generated")
+    self.packer = CANPackerPanda("subaru_global_2022_generated")
     self.safety = libpandasafety_py.libpandasafety
     self.safety.set_safety_hooks(Panda.SAFETY_SUBARU, Panda.FLAG_SUBARU_FORESTER_2022)
     self.safety.init_tests()
