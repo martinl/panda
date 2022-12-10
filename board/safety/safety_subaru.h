@@ -79,7 +79,6 @@ AddrCheckStruct subaru_crosstrek_hybrid_addr_checks[] = {
   {.msg = {{0x139, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep =  20000U}, { 0 }, { 0 }}},
   {.msg = {{0x13a, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep =  20000U}, { 0 }, { 0 }}},
   {.msg = {{0x168, 1, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep =  40000U}, { 0 }, { 0 }}},
-  {.msg = {{0x222, 2, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep =  50000U}, { 0 }, { 0 }}},
   {.msg = {{0x226, 1, 8, .expected_timestep = 40000U}, { 0 }, { 0 }}},
   {.msg = {{0x321, 2, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 100000U}, { 0 }, { 0 }}},
 };
@@ -147,7 +146,12 @@ static int subaru_rx_hook(CANPacket_t *to_push) {
       pcm_cruise_check(cruise_engaged);
     }
 
-    if ((addr == 0x222) && (bus == 2) && (subaru_crosstrek_hybrid || subaru_forester_hybrid || subaru_forester_2022)) {
+    if ((addr == 0x321) && (bus == 2) && subaru_crosstrek_hybrid) {
+      bool cruise_engaged = ((GET_BYTES_48(to_push) >> 4) & 1U);
+      pcm_cruise_check(cruise_engaged);
+    }
+
+    if ((addr == 0x222) && (bus == 2) && (subaru_forester_hybrid || subaru_forester_2022)) {
       bool cruise_engaged = GET_BIT(to_push, 29U) != 0U;
       pcm_cruise_check(cruise_engaged);
     }
