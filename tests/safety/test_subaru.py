@@ -98,7 +98,7 @@ class TestSubaruCrosstrekHybridSafety(TestSubaruSafety):
 
   def _pcm_status_msg(self, enable):
     values = {"Cruise_Activated": enable}
-    return self.packer.make_can_msg_panda("ES_DashStatus", 2, values)
+    return self.packer.make_can_msg_panda("ES_Status", 2, values)
 
 class TestSubaruForesterHybridSafety(TestSubaruSafety):
 
@@ -110,7 +110,7 @@ class TestSubaruForesterHybridSafety(TestSubaruSafety):
 
   def _pcm_status_msg(self, enable):
     values = {"Cruise_Activated": enable}
-    return self.packer.make_can_msg_panda("ES_DashStatus", 2, values)
+    return self.packer.make_can_msg_panda("ES_Status", 2, values)
 
 class TestSubaruForester2022Safety(TestSubaruSafety):
   TX_MSGS = [[0x124, 0], [0x221, 0], [0x321, 0], [0x322, 0], [0x40, 2], [0x139, 2]]
@@ -125,7 +125,7 @@ class TestSubaruForester2022Safety(TestSubaruSafety):
 
   def _pcm_status_msg(self, enable):
     values = {"Cruise_Activated": enable}
-    return self.packer.make_can_msg_panda("ES_DashStatus", 2, values)
+    return self.packer.make_can_msg_panda("ES_Status", 2, values)
 
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"LKAS_Output": torque}
