@@ -148,7 +148,7 @@ static int subaru_rx_hook(CANPacket_t *to_push) {
     }
 
     if ((addr == 0x222) && (bus == 2) && (subaru_crosstrek_hybrid || subaru_forester_hybrid || subaru_forester_2022)) {
-      bool cruise_engaged = GET_BIT(to_push, 29) != 0U;
+      bool cruise_engaged = GET_BIT(to_push, 29U) != 0U;
       pcm_cruise_check(cruise_engaged);
     }
 
