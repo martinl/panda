@@ -10,6 +10,7 @@ const board board_red_v2 = {
   .has_hw_gmlan = false,
   .has_obd = true,
   .has_lin = false,
+  .has_spi = false,
   .has_canfd = true,
   .has_rtc_battery = true,
   .fan_max_rpm = 0U,
@@ -24,6 +25,5 @@ const board board_red_v2 = {
   .set_fan_enabled = unused_set_fan_enabled,
   .set_ir_power = unused_set_ir_power,
   .set_phone_power = unused_set_phone_power,
-  .set_clock_source_mode = unused_set_clock_source_mode,
   .set_siren = unused_set_siren
 };
