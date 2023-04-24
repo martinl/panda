@@ -228,9 +228,13 @@ class Panda:
 
   FLAG_SUBARU_GEN2 = 1
   FLAG_SUBARU_LONG = 2
+  FLAG_SUBARU_GEN2_USING_SECOND_PANDA = 32
+  FLAG_SUBARU_GEN2_IS_SECOND_PANDA = 64
 
   FLAG_GM_HW_CAM = 1
   FLAG_GM_HW_CAM_LONG = 2
+
+  FLAG_ALLOUTPUT_PASSTHROUGH = 1
 
   def __init__(self, serial: Optional[str] = None, claim: bool = True, disable_checks: bool = True):
     self._connect_serial = serial
