@@ -181,6 +181,7 @@ static int subaru_rx_hook(CANPacket_t *to_push) {
     const int alt_bus2 = (subaru_gen2 && !subaru_gen2_using_second_panda) ? 1 : 2;
 
     int addr = GET_ADDR(to_push);
+    // only on first panda
     if ((addr == Steering_Torque) && (bus == MAIN_BUS)) {
       int torque_driver_new;
       torque_driver_new = ((GET_BYTES_04(to_push) >> 16) & 0x7FFU);
@@ -188,29 +189,35 @@ static int subaru_rx_hook(CANPacket_t *to_push) {
       update_sample(&torque_driver, torque_driver_new);
     }
 
+    // only on second panda
     if ((addr == ES_Brake) && (bus == alt_bus2)) {
       subaru_aeb = GET_BIT(to_push, 38U) != 0U;
     }
 
     // enter controls on rising edge of ACC, exit controls on ACC off
+    // only on second panda
     if ((addr == CruiseControl) && (bus == alt_bus)) {
       bool cruise_engaged = GET_BIT(to_push, 41U) != 0U;
       pcm_cruise_check(cruise_engaged);
     }
 
     // update vehicle moving with any non-zero wheel speed
+    // only on second panda
     if ((addr == Wheel_Speeds) && (bus == alt_bus)) {
       vehicle_moving = ((GET_BYTES_04(to_push) >> 12) != 0U) || (GET_BYTES_48(to_push) != 0U);
     }
 
+    // only on second panda
     if ((addr == Brake_Status) && (bus == alt_bus)) {
       brake_pressed = ((GET_BYTE(to_push, 7) >> 6) & 1U);
     }
 
+    // on both first and second panda
     if ((addr == Throttle) && (bus == MAIN_BUS)) {
       gas_pressed = GET_BYTE(to_push, 4) != 0U;
     }
 
+    // only on first panda
     generic_rx_checks((addr == ES_LKAS) && (bus == MAIN_BUS));
   }
   return valid;
