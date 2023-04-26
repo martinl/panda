@@ -309,10 +309,10 @@ static const addr_checks* subaru_init(uint16_t param) {
   if (subaru_gen2) {
     if(subaru_gen2_using_second_panda){
       if(subaru_gen2_is_second_panda){
-        subaru_rx_checks = (addr_checks){subaru_gen2_second_panda_rx_checks, SUBARU_GEN2_SECOND_PANDA_ADDR_CHECK_LEN};
+        subaru_rx_checks = (addr_checks){subaru_gen2_second_panda_addr_checks, SUBARU_GEN2_SECOND_PANDA_ADDR_CHECK_LEN};
       }
       else{
-        subaru_rx_checks = (addr_checks){subaru_gen2_first_panda_rx_checks, SUBARU_GEN2_FIRST_PANDA_ADDR_CHECK_LEN};
+        subaru_rx_checks = (addr_checks){subaru_gen2_first_panda_addr_checks, SUBARU_GEN2_FIRST_PANDA_ADDR_CHECK_LEN};
       }
     }
     else{
