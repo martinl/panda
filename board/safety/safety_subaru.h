@@ -190,7 +190,10 @@ static int subaru_rx_hook(CANPacket_t *to_push) {
     }
 
     // only on second panda
-    if ((addr == ES_Brake) && (bus == alt_bus2)) {
+    // ES_LKAS_State LKAS_Alert: 2, 5, 6
+    if ((addr == ES_LKAS_State) && (bus == alt_bus2)) {
+      const int lkas_alert = ((GET_BYTE(to_push, 4) >> 3) & 5U);
+      subaru_aeb = ((lkas_alert == 2) || (lkas_alert == 5) || (lkas_alert == 6));
       subaru_aeb = GET_BIT(to_push, 38U) != 0U;
     }
 
@@ -248,18 +251,18 @@ static int subaru_tx_hook(CANPacket_t *to_send) {
     }
   }
 
-  if (subaru_longitudinal) {
+  if (subaru_longitudinal && controls_allowed) {
     if (addr == ES_Brake) {
       int es_brake_pressure = ((GET_BYTES_04(to_send) >> 16) & 0xFFFFU);
-      violation |= subaru_aeb || longitudinal_brake_checks(es_brake_pressure, SUBARU_LONG_LIMITS);
+      violation |= !subaru_aeb && longitudinal_brake_checks(es_brake_pressure, SUBARU_LONG_LIMITS);
     }
 
-    if ((addr == ES_Distance) && controls_allowed && !gas_pressed) {
+    if ((addr == ES_Distance) && !gas_pressed) {
       int cruise_throttle = ((GET_BYTES_04(to_send) >> 16) & 0xFFFU);
       violation |= longitudinal_gas_checks(cruise_throttle, SUBARU_LONG_LIMITS);
     }
 
-    if ((addr == ES_Status) && controls_allowed && !gas_pressed) {
+    if ((addr == ES_Status) && !gas_pressed) {
       int cruise_rpm = ((GET_BYTES_04(to_send) >> 16) & 0xFFFU);
       if (get_longitudinal_allowed()) {
         violation |= max_limit_check(cruise_rpm, SUBARU_LONG_LIMITS.max_rpm, SUBARU_LONG_LIMITS.min_rpm);
