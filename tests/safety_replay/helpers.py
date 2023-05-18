@@ -22,7 +22,7 @@ def is_steering_msg(mode, addr):
     ret = addr == 0x292
   elif mode == Panda.SAFETY_SUBARU:
     ret = addr == 0x122
-  elif mode == Panda.SAFETY_SUBARU_LEGACY:
+  elif mode == Panda.SAFETY_SUBARU_PREGLOBAL:
     ret = addr == 0x164
   elif mode == Panda.SAFETY_FORD:
     ret = addr == 0x3d3
