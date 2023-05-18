@@ -52,8 +52,8 @@ RUN curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-instal
 ENV PATH="/root/.pyenv/bin:/root/.pyenv/shims:${PATH}"
 
 ENV PANDA_PATH=/tmp/openpilot/panda
-ENV OPENPILOT_REF="dc212dd207496f33fd20d76df77bce5ff221bf60"
-ENV OPENDBC_REF="196de2f0efd4549b3389c8c883be361d3d5304bf"
+ENV OPENPILOT_REF="ee0dd36a3c775dbd82493c84f4e7272c1eb3fcbd"
+ENV OPENDBC_REF="342c0320dd271fb585db3cced397c5122078af85"
 
 COPY requirements.txt /tmp/
 RUN pyenv install 3.8.10 && \
@@ -85,7 +85,7 @@ RUN cd /tmp/openpilot && \
     git clone https://github.com/commaai/panda_jungle.git && \
     cd panda_jungle && \
     git fetch && \
-    git checkout 7b7197c605915ac34f3d62f314edd84e2e78a759 && \
+    git checkout 3a791be1f1877a69cf45de16a670992380622297 && \
     rm -rf .git/
 
 RUN cd /tmp/openpilot && \

@@ -25,6 +25,7 @@ const CanMsg SUBARU_TX_MSGS[] = {
   {0x221, 0, 8},
   {0x321, 0, 8},
   {0x322, 0, 8},
+  {0x323, 0, 8},
   {0x40,  2, 8},
   {0x139, 2, 8}
 };
@@ -34,7 +35,8 @@ const CanMsg SUBARU_GEN2_TX_MSGS[] = {
   {0x122, 0, 8},
   {0x221, 1, 8},
   {0x321, 0, 8},
-  {0x322, 0, 8}
+  {0x322, 0, 8},
+  {0x323, 0, 8}
 };
 #define SUBARU_GEN2_TX_MSGS_LEN (sizeof(SUBARU_GEN2_TX_MSGS) / sizeof(SUBARU_GEN2_TX_MSGS[0]))
 
@@ -125,7 +127,7 @@ static uint32_t subaru_compute_checksum(CANPacket_t *to_push) {
 static int subaru_rx_hook(CANPacket_t *to_push) {
 
   bool valid = addr_safety_check(to_push, &subaru_rx_checks,
-                                 subaru_get_checksum, subaru_compute_checksum, subaru_get_counter);
+                                 subaru_get_checksum, subaru_compute_checksum, subaru_get_counter, NULL);
 
   if (valid) {
     const int bus = GET_BUS(to_push);
@@ -135,7 +137,7 @@ static int subaru_rx_hook(CANPacket_t *to_push) {
     int addr = GET_ADDR(to_push);
     if ((addr == 0x119) && (bus == 0)) {
       int torque_driver_new;
-      torque_driver_new = ((GET_BYTES_04(to_push) >> 16) & 0x7FFU);
+      torque_driver_new = ((GET_BYTES(to_push, 0, 4) >> 16) & 0x7FFU);
       torque_driver_new = -1 * to_signed(torque_driver_new, 11);
       update_sample(&torque_driver, torque_driver_new);
     }
@@ -158,7 +160,7 @@ static int subaru_rx_hook(CANPacket_t *to_push) {
 
     // update vehicle moving with any non-zero wheel speed
     if ((addr == 0x13a) && (bus == alt_bus)) {
-      vehicle_moving = ((GET_BYTES_04(to_push) >> 12) != 0U) || (GET_BYTES_48(to_push) != 0U);
+      vehicle_moving = ((GET_BYTES(to_push, 0, 4) >> 12) != 0U) || (GET_BYTES(to_push, 4, 4) != 0U);
     }
 
     if ((addr == 0x13c) && (bus == alt_bus) && !subaru_crosstrek_hybrid) {
@@ -201,6 +203,7 @@ static int subaru_tx_hook(CANPacket_t *to_send) {
   // steer cmd checks
   if ((addr == 0x122) && !subaru_forester_2022) {
     int desired_torque = ((GET_BYTES_04(to_send) >> 16) & 0x1FFFU);
+    int desired_torque = ((GET_BYTES(to_send, 0, 4) >> 16) & 0x1FFFU);
     desired_torque = -1 * to_signed(desired_torque, 13);
 
     const SteeringLimits limits = subaru_gen2 ? SUBARU_GEN2_STEERING_LIMITS : SUBARU_STEERING_LIMITS;
@@ -224,7 +227,7 @@ static int subaru_tx_hook(CANPacket_t *to_send) {
   return tx;
 }
 
-static int subaru_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
+static int subaru_fwd_hook(int bus_num, int addr) {
   int bus_fwd = -1;
   int addr = GET_ADDR(to_fwd);
 
@@ -243,8 +246,9 @@ static int subaru_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
     // 0x124 ES_LKAS_2
     // 0x321 ES_DashStatus
     // 0x322 ES_LKAS_State
+    // 0x323 INFOTAINMENT_STATUS
     int lkas_msg = subaru_forester_2022 ? 0x124 : 0x122;
-    bool block_lkas = (addr == lkas_msg) || (addr == 0x321) || (addr == 0x322);
+    bool block_lkas = (addr == lkas_msg) || (addr == 0x321) || (addr == 0x322) || (addr == 0x323);
     if (!block_lkas) {
       bus_fwd = 0;  // Main CAN
     }
