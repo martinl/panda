@@ -9,7 +9,7 @@ const SteeringLimits SUBARU_PG_STEERING_LIMITS = {
   .type = TorqueDriverLimited,
 };
 
-const uint32_t SUBARU_L_BRAKE_THRSLD = 2; // filter sensor noise, max_brake is 400
+const uint32_t SUBARU_PG_BRAKE_THRSLD = 2; // filter sensor noise, max_brake is 400
 
 const CanMsg SUBARU_PG_TX_MSGS[] = {
   {0x161, 0, 8},
@@ -40,7 +40,7 @@ static int subaru_preglobal_rx_hook(CANPacket_t *to_push) {
       int torque_driver_new;
       torque_driver_new = (GET_BYTE(to_push, 3) >> 5) + (GET_BYTE(to_push, 4) << 3);
       torque_driver_new = to_signed(torque_driver_new, 11);
-      if (subaru_l_flip_driver_torque) {
+      if (subaru_preglobal_flip_driver_torque) {
         torque_driver_new = -1 * torque_driver_new;
       }
       update_sample(&torque_driver, torque_driver_new);
