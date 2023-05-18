@@ -69,7 +69,7 @@ class TestSubaruPreglobal2019Safety(TestSubaruPreglobalSafety):
 
   def setUp(self):
     self.packer = CANPackerPanda("subaru_outback_2019_generated")
-    self.safety = libpandasafety_py.libpandasafety
+    self.safety = libpanda_py.libpanda
     self.safety.set_safety_hooks(Panda.SAFETY_SUBARU_PREGLOBAL, Panda.FLAG_SUBARU_PREGLOBAL_FLIP_DRIVER_TORQUE)
     self.safety.init_tests()
 

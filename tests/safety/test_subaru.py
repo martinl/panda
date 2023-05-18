@@ -84,7 +84,7 @@ class TestSubaruCrosstrekHybridSafety(TestSubaruSafety):
 
   def setUp(self):
     self.packer = CANPackerPanda("subaru_global_2020_hybrid_generated")
-    self.safety = libpandasafety_py.libpandasafety
+    self.safety = libpanda_py.libpanda
     self.safety.set_safety_hooks(Panda.SAFETY_SUBARU, Panda.FLAG_SUBARU_CROSSTREK_HYBRID)
     self.safety.init_tests()
 
@@ -104,7 +104,7 @@ class TestSubaruForesterHybridSafety(TestSubaruSafety):
 
   def setUp(self):
     self.packer = CANPackerPanda("subaru_global_2017_generated")
-    self.safety = libpandasafety_py.libpandasafety
+    self.safety = libpanda_py.libpanda
     self.safety.set_safety_hooks(Panda.SAFETY_SUBARU, Panda.FLAG_SUBARU_FORESTER_HYBRID)
     self.safety.init_tests()
 
@@ -119,7 +119,7 @@ class TestSubaruForester2022Safety(TestSubaruSafety):
 
   def setUp(self):
     self.packer = CANPackerPanda("subaru_global_2022_generated")
-    self.safety = libpandasafety_py.libpandasafety
+    self.safety = libpanda_py.libpanda
     self.safety.set_safety_hooks(Panda.SAFETY_SUBARU, Panda.FLAG_SUBARU_FORESTER_2022)
     self.safety.init_tests()
 
