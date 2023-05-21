@@ -38,6 +38,14 @@ const CanMsg SUBARU_GEN2_TX_MSGS[] = {
 };
 #define SUBARU_GEN2_TX_MSGS_LEN (sizeof(SUBARU_GEN2_TX_MSGS) / sizeof(SUBARU_GEN2_TX_MSGS[0]))
 
+const CanMsg SUBARU_OUTBACK_2023_TX_MSGS[] = {
+  {0x124, 0, 8},
+  {0x221, 1, 8},
+  {0x321, 0, 8},
+  {0x322, 0, 8}
+};
+#define SUBARU_OUTBACK_2023_TX_MSGS_LEN (sizeof(SUBARU_OUTBACK_2023_TX_MSGS) / sizeof(SUBARU_OUTBACK_2023_TX_MSGS[0]))
+
 const CanMsg SUBARU_CROSSTREK_HYBRID_TX_MSGS[] = {
   {0x122, 0, 8},
   {0x321, 0, 8},
@@ -98,10 +106,12 @@ const uint16_t SUBARU_PARAM_GEN2 = 1;
 const uint16_t SUBARU_PARAM_CROSSTREK_HYBRID = 2;
 const uint16_t SUBARU_PARAM_FORESTER_HYBRID = 4;
 const uint16_t SUBARU_PARAM_FORESTER_2022 = 8;
+const uint16_t SUBARU_PARAM_OUTBACK_2023 = 16;
 bool subaru_gen2 = false;
 bool subaru_crosstrek_hybrid = false;
 bool subaru_forester_hybrid = false;
 bool subaru_forester_2022 = false;
+bool subaru_outback_2023 = false;
 
 
 static uint32_t subaru_get_checksum(CANPacket_t *to_push) {
@@ -130,7 +140,7 @@ static int subaru_rx_hook(CANPacket_t *to_push) {
   if (valid) {
     const int bus = GET_BUS(to_push);
     const int alt_bus = subaru_gen2 ? 1 : 0;
-    const int stock_ecu = subaru_forester_2022 ? 0x124 : 0x122;
+    const int stock_ecu = (subaru_forester_2022 || subaru_outback_2023) ? 0x124 : 0x122;
 
     int addr = GET_ADDR(to_push);
     if ((addr == 0x119) && (bus == 0)) {
@@ -195,12 +205,14 @@ static int subaru_tx_hook(CANPacket_t *to_send, bool longitudinal_allowed) {
     tx = msg_allowed(to_send, SUBARU_CROSSTREK_HYBRID_TX_MSGS, SUBARU_CROSSTREK_HYBRID_TX_MSGS_LEN);
   } else if (subaru_forester_2022) {
     tx = msg_allowed(to_send, SUBARU_FORESTER_2022_TX_MSGS, SUBARU_FORESTER_2022_TX_MSGS_LEN);
+  } else if (subaru_outback_2023) {
+    tx = msg_allowed(to_send, SUBARU_OUTBACK_2023_TX_MSGS, SUBARU_OUTBACK_2023_TX_MSGS_LEN);
   } else {
     tx = msg_allowed(to_send, SUBARU_TX_MSGS, SUBARU_TX_MSGS_LEN);
   }
 
   // steer cmd checks
-  if ((addr == 0x122) && !subaru_forester_2022) {
+  if ((addr == 0x122) && (!subaru_forester_2022 || !subaru_outback_2023)) {
     int desired_torque = ((GET_BYTES_04(to_send) >> 16) & 0x1FFFU);
     desired_torque = -1 * to_signed(desired_torque, 13);
 
@@ -211,7 +223,7 @@ static int subaru_tx_hook(CANPacket_t *to_send, bool longitudinal_allowed) {
 
   }
 
-  if ((addr == 0x124) && subaru_forester_2022) {
+  if ((addr == 0x124) && (subaru_forester_2022 || subaru_outback_2023)) {
     int desired_torque = ((GET_BYTES_48(to_send) >> 8) & 0x3FFFFU);
     desired_torque = -1 * to_signed(desired_torque, 17);
 
@@ -244,7 +256,7 @@ static int subaru_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
     // 0x124 ES_LKAS_2
     // 0x321 ES_DashStatus
     // 0x322 ES_LKAS_State
-    int lkas_msg = subaru_forester_2022 ? 0x124 : 0x122;
+    int lkas_msg = (subaru_forester_2022 || subaru_outback_2023) ? 0x124 : 0x122;
     bool block_lkas = (addr == lkas_msg) || (addr == 0x321) || (addr == 0x322);
     if (!block_lkas) {
       bus_fwd = 0;  // Main CAN
@@ -259,6 +271,7 @@ static const addr_checks* subaru_init(uint16_t param) {
   subaru_crosstrek_hybrid = GET_FLAG(param, SUBARU_PARAM_CROSSTREK_HYBRID);
   subaru_forester_hybrid = GET_FLAG(param, SUBARU_PARAM_FORESTER_HYBRID);
   subaru_forester_2022 = GET_FLAG(param, SUBARU_PARAM_FORESTER_2022);
+  subaru_outback_2023 = GET_FLAG(param, SUBARU_PARAM_OUTBACK_2023);
 
   if (subaru_gen2) {
     subaru_rx_checks = (addr_checks){subaru_gen2_addr_checks, SUBARU_GEN2_ADDR_CHECK_LEN};
