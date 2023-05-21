@@ -78,5 +78,21 @@ class TestSubaruGen2Safety(TestSubaruSafety):
     self.safety.init_tests()
 
 
+class TestSubaruOutback2023Safety(TestSubaruGen2Safety):
+  TX_MSGS = [[0x124, 0], [0x221, 0], [0x321, 0], [0x322, 0]]
+  RELAY_MALFUNCTION_ADDR = 0x124
+  FWD_BLACKLISTED_ADDRS = {2: [0x124, 0x321, 0x322]}
+
+  def setUp(self):
+    self.packer = CANPackerPanda("subaru_global_2022_generated")
+    self.safety = libpandasafety_py.libpandasafety
+    self.safety.set_safety_hooks(Panda.SAFETY_SUBARU, Panda.FLAG_SUBARU_OUTBACK_2023)
+    self.safety.init_tests()
+
+  def _torque_cmd_msg(self, torque, steer_req=1):
+    values = {"LKAS_Output": torque}
+    return self.packer.make_can_msg_panda("ES_LKAS_2", 0, values)
+
+
 if __name__ == "__main__":
   unittest.main()
