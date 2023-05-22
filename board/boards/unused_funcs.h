@@ -32,3 +32,7 @@ void unused_board_tick(bool ignition, bool usb_enum, bool heartbeat_seen, bool h
 bool unused_read_som_gpio(void) {
   return false;
 }
+
+void unused_set_usb_power_mode(uint8_t mode) {
+  UNUSED(mode);
+}

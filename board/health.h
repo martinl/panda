@@ -29,6 +29,8 @@ struct __attribute__((packed)) health_t {
   uint8_t fan_stall_count;
   uint16_t sbu1_voltage_mV;
   uint16_t sbu2_voltage_mV;
+  uint8_t usb_power_mode_pkt;
+  uint8_t torque_interceptor_detected_pkt;
 };
 
 #define CAN_HEALTH_PACKET_VERSION 4

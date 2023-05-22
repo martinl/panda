@@ -49,6 +49,25 @@ void red_set_led(uint8_t color, bool enabled) {
   }
 }
 
+void red_set_usb_power_mode(uint8_t mode) {
+  bool valid = false;
+  switch (mode) {
+    case USB_POWER_CLIENT:
+      red_set_usb_load_switch(false);
+      valid = true;
+      break;
+    case USB_POWER_CDP:
+      red_set_usb_load_switch(true);
+      valid = true;
+      break;
+    default:
+      break;
+  }
+  if (valid) {
+    usb_power_mode = mode;
+  }
+}
+
 void red_set_can_mode(uint8_t mode) {
   switch (mode) {
     case CAN_MODE_NORMAL:
@@ -129,6 +148,9 @@ void red_init(void) {
   set_gpio_mode(GPIOB, 14, MODE_OUTPUT);
   set_gpio_output(GPIOB, 14, 1);
 
+  // Set right power mode
+  red_set_usb_power_mode(USB_POWER_CDP);
+
   // Initialize harness
   harness_init();
 
@@ -185,6 +207,7 @@ const board board_red = {
   .enable_can_transceiver = red_enable_can_transceiver,
   .enable_can_transceivers = red_enable_can_transceivers,
   .set_led = red_set_led,
+  .set_usb_power_mode = red_set_usb_power_mode,
   .set_gps_mode = unused_set_gps_mode,
   .set_can_mode = red_set_can_mode,
   .check_ignition = red_check_ignition,

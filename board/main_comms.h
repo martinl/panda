@@ -22,6 +22,7 @@ int get_health_pkt(void *dat) {
   health->safety_rx_invalid_pkt = safety_rx_invalid;
   health->tx_buffer_overflow_pkt = tx_buffer_overflow;
   health->rx_buffer_overflow_pkt = rx_buffer_overflow;
+  health->torque_interceptor_detected_pkt = torque_interceptor_detected;
   health->gmlan_send_errs_pkt = gmlan_send_errs;
   health->car_harness_status_pkt = harness.status;
   health->safety_mode_pkt = (uint8_t)(current_safety_mode);
@@ -44,6 +45,7 @@ int get_health_pkt(void *dat) {
   health->sbu1_voltage_mV = harness.sbu1_voltage_mV;
   health->sbu2_voltage_mV = harness.sbu2_voltage_mV;
 
+  health->usb_power_mode_pkt = usb_power_mode;
   return sizeof(*health);
 }
 
@@ -383,6 +385,10 @@ int comms_control_handler(ControlPacket_t *req, uint8_t *resp) {
     case 0xe5:
       can_loopback = (req->param1 > 0U);
       can_init_all();
+      break;
+    // **** 0xe6: set USB power
+    case 0xe6:
+      current_board->set_usb_power_mode(req->param1);
       break;
     // **** 0xe7: set power save state
     case 0xe7:

@@ -55,6 +55,20 @@ void debug_ring_callback(uart_ring *ring) {
     if (rcv == 'x') {
       NVIC_SystemReset();
     }
+
+    // enable CDP mode
+    if (rcv == 'C') {
+      print("switching USB to CDP mode\n");
+      current_board->set_usb_power_mode(USB_POWER_CDP);
+    }
+    if (rcv == 'c') {
+      print("switching USB to client mode\n");
+      current_board->set_usb_power_mode(USB_POWER_CLIENT);
+    }
+    if (rcv == 'D') {
+      print("switching USB to DCP mode\n");
+      current_board->set_usb_power_mode(USB_POWER_DCP);
+    }
   }
 }
 
@@ -103,6 +117,15 @@ void set_safety_mode(uint16_t mode, uint16_t param) {
         } else {
           current_board->set_can_mode(CAN_MODE_NORMAL);
         }
+      }
+      can_silent = ALL_CAN_LIVE;
+      break;
+    case SAFETY_MAZDA:
+      set_intercept_relay(true);
+      heartbeat_counter = 0U;
+      heartbeat_lost = false;
+      if (current_board->has_obd) {
+        current_board->set_can_mode(CAN_MODE_OBD_CAN2);
       }
       can_silent = ALL_CAN_LIVE;
       break;
@@ -259,6 +282,11 @@ void tick_handler(void) {
             fan_set_power(0U);
           }
         }
+
+        // enter CDP mode when car starts to ensure we are charging a turned off EON
+        if (check_started() && ((usb_power_mode != USB_POWER_CDP) || !usb_enumerated)) {
+          current_board->set_usb_power_mode(USB_POWER_CDP);
+        }
       }
 
       // check registers
@@ -289,6 +317,7 @@ void EXTI_IRQ_Handler(void) {
     exti_irq_clear();
     clock_init();
 
+    current_board->set_usb_power_mode(USB_POWER_CDP);
     set_power_save_state(POWER_SAVE_STATUS_DISABLED);
     deepsleep_allowed = false;
     heartbeat_counter = 0U;
@@ -404,15 +433,17 @@ int main(void) {
       #ifdef DEBUG_FAULTS
       if (fault_status == FAULT_STATUS_NONE) {
       #endif
+        uint32_t div_mode = ((usb_power_mode == USB_POWER_DCP) ? 4U : 1U);
+
         // useful for debugging, fade breaks = panda is overloaded
-        for (uint32_t fade = 0U; fade < MAX_LED_FADE; fade += 1U) {
+        for (uint32_t fade = 0U; fade < MAX_LED_FADE; fade += div_mode) {
           current_board->set_led(LED_RED, true);
           delay(fade >> 4);
           current_board->set_led(LED_RED, false);
           delay((MAX_LED_FADE - fade) >> 4);
         }
 
-        for (uint32_t fade = MAX_LED_FADE; fade > 0U; fade -= 1U) {
+        for (uint32_t fade = MAX_LED_FADE; fade > 0U; fade -= div_mode) {
           current_board->set_led(LED_RED, true);
           delay(fade >> 4);
           current_board->set_led(LED_RED, false);
@@ -431,6 +462,7 @@ int main(void) {
       if (deepsleep_allowed && !usb_enumerated && !check_started() && ignition_seen && (heartbeat_counter > 20U)) {
         usb_soft_disconnect(true);
         fan_set_power(0U);
+        current_board->set_usb_power_mode(USB_POWER_CLIENT);
         NVIC_DisableIRQ(TICK_TIMER_IRQ);
         delay(512000U);
 

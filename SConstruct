@@ -1,6 +1,6 @@
 AddOption('--test',
           action='store_true',
-          default=True,
+          default=False,
           help='build test files')
 
 AddOption('--ubsan',
