@@ -19,6 +19,14 @@ const CanMsg SUBARU_L_TX_MSGS[] = {{0x161, 0, 8}, {0x164, 0, 8}, {0x140, 2, 8}};
 const CanMsg SUBARU_GEN2_TX_MSGS[] = {{0x122, 0, 8}, {0x321, 0, 8}, {0x322, 0, 8}, {0x40, 2, 8}, {0x139, 2, 8}};
 #define SUBARU_GEN2_TX_MSGS_LEN (sizeof(SUBARU_GEN2_TX_MSGS) / sizeof(SUBARU_GEN2_TX_MSGS[0]))
 
+const CanMsg SUBARU_OUTBACK_2023_TX_MSGS[] = {
+  {0x124, 0, 8},
+  {0x221, 1, 8},
+  {0x321, 0, 8},
+  {0x322, 0, 8}
+};
+#define SUBARU_OUTBACK_2023_TX_MSGS_LEN (sizeof(SUBARU_OUTBACK_2023_TX_MSGS) / sizeof(SUBARU_OUTBACK_2023_TX_MSGS[0]))
+
 AddrCheckStruct subaru_addr_checks[] = {
   {.msg = {{ 0x40, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 10000U}, { 0 }, { 0 }}},
   {.msg = {{0x119, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 20000U}, { 0 }, { 0 }}},
@@ -70,6 +78,8 @@ AddrCheckStruct subaru_forester_hybrid_addr_checks[] = {
 #define SUBARU_FORESTER_HYBRID_ADDR_CHECK_LEN (sizeof(subaru_forester_hybrid_addr_checks) / sizeof(subaru_forester_hybrid_addr_checks[0]))
 addr_checks subaru_forester_hybrid_rx_checks = {subaru_forester_hybrid_addr_checks, SUBARU_FORESTER_HYBRID_ADDR_CHECK_LEN};
 
+const uint16_t SUBARU_PARAM_OUTBACK_2023 = 16;
+bool subaru_outback_2023 = false;
 
 const uint16_t SUBARU_L_PARAM_FLIP_DRIVER_TORQUE = 1;
 bool subaru_l_flip_driver_torque = false;
@@ -371,6 +381,7 @@ static int subaru_gen2_rx_hook(CANPacket_t *to_push) {
                             subaru_get_checksum, subaru_compute_checksum, subaru_get_counter);
   int addr = GET_ADDR(to_push);
   uint8_t bus = GET_BUS(to_push);
+  const int stock_ecu = subaru_outback_2023 ? 0x124 : 0x122;
 
   if (valid && (bus == 0U)) {
     if (addr == 0x119) {
@@ -422,7 +433,7 @@ static int subaru_gen2_rx_hook(CANPacket_t *to_push) {
     gas_pressed_prev = gas_pressed;
 
     // check if stock ECU is on bus broken by car harness
-    if (addr == 0x122) {
+    if (addr == stock_ecu) {
       if (safety_mode_cnt > RELAY_TRNS_TIMEOUT) {
         relay_malfunction_set();
       }
@@ -437,12 +448,15 @@ static int subaru_gen2_tx_hook(CANPacket_t *to_send, bool longitudinal_allowed) 
   int tx = 1;
   int addr = GET_ADDR(to_send);
 
-  if (!msg_allowed(to_send, SUBARU_GEN2_TX_MSGS, SUBARU_GEN2_TX_MSGS_LEN)) {
-    tx = 0;
+  if (subaru_outback_2023) {
+    tx = msg_allowed(to_send, SUBARU_OUTBACK_2023_TX_MSGS, SUBARU_OUTBACK_2023_TX_MSGS_LEN);
+  }
+  else {
+    tx = msg_allowed(to_send, SUBARU_GEN2_TX_MSGS, SUBARU_GEN2_TX_MSGS_LEN);
   }
 
   // steer cmd checks
-  if (addr == 0x122) {
+  if ((addr == 0x122) && !subaru_outback_2023) {
     int desired_torque = ((GET_BYTES_04(to_send) >> 16) & 0x1FFFU);
     bool violation = 0;
     uint32_t ts = microsecond_timer_get();
@@ -489,6 +503,50 @@ static int subaru_gen2_tx_hook(CANPacket_t *to_send, bool longitudinal_allowed) 
       tx = 0;
     }
 
+  }
+  if ((addr == 0x124) && subaru_outback_2023) {
+    int desired_torque = ((GET_BYTES_48(to_send) >> 8) & 0x3FFFFU);
+    desired_torque = -1 * to_signed(desired_torque, 17);
+
+    if (controls_allowed) {
+
+      // *** global torque limit check ***
+      violation |= max_limit_check(desired_torque, SUBARU_MAX_STEER, -SUBARU_MAX_STEER);
+
+      // *** torque rate limit check ***
+      violation |= driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
+        SUBARU_MAX_STEER, SUBARU_MAX_RATE_UP, SUBARU_MAX_RATE_DOWN,
+        SUBARU_DRIVER_TORQUE_ALLOWANCE, SUBARU_DRIVER_TORQUE_FACTOR);
+
+      // used next time
+      desired_torque_last = desired_torque;
+
+      // *** torque real time rate limit check ***
+      violation |= rt_rate_limit_check(desired_torque, rt_torque_last, SUBARU_MAX_RT_DELTA);
+
+      // every RT_INTERVAL set the new limits
+      uint32_t ts_elapsed = get_ts_elapsed(ts, ts_last);
+      if (ts_elapsed > SUBARU_RT_INTERVAL) {
+        rt_torque_last = desired_torque;
+        ts_last = ts;
+      }
+    }
+
+    // no torque if controls is not allowed
+    if (!controls_allowed && (desired_torque != 0)) {
+      violation = 1;
+    }
+
+    // reset to 0 if either controls is not allowed or there's a violation
+    if (violation || !controls_allowed) {
+      desired_torque_last = 0;
+      rt_torque_last = 0;
+      ts_last = ts;
+    }
+
+    if (violation) {
+      tx = 0;
+    }
   }
   return tx;
 }
@@ -645,7 +703,7 @@ static const addr_checks* subaru_init(uint32_t param) {
 }
 
 static const addr_checks* subaru_gen2_init(uint32_t param) {
-  UNUSED(param);
+  subaru_outback_2023 = GET_FLAG(param, SUBARU_PARAM_OUTBACK_2023);
   controls_allowed = false;
   relay_malfunction_reset();
   return &subaru_gen2_rx_checks;
