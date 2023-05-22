@@ -507,6 +507,8 @@ static int subaru_gen2_tx_hook(CANPacket_t *to_send, bool longitudinal_allowed) 
   if ((addr == 0x124) && subaru_outback_2023) {
     int desired_torque = ((GET_BYTES_48(to_send) >> 8) & 0x3FFFFU);
     desired_torque = -1 * to_signed(desired_torque, 17);
+    bool violation = 0;
+    uint32_t ts = microsecond_timer_get();
 
     if (controls_allowed) {
 
