@@ -193,6 +193,9 @@ class Panda(object):
   FLAG_TESLA_POWERTRAIN = 1
   FLAG_TESLA_LONG_CONTROL = 2
 
+  FLAG_SUBARU_L_FLIP_DRIVER_TORQUE = 1
+  FLAG_SUBARU_OUTBACK_2023 = 16
+
   def __init__(self, serial=None, claim=True):
     self._serial = serial
     self._handle = None
