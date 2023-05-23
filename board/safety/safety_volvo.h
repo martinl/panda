@@ -59,7 +59,7 @@ float volvo_speed = 0;
 
 // safety params
 const float DEG_TO_CAN_VOLVO_C1 = 1/0.04395;            // 22.75312855517634‬, inverse of dbc scaling
-const int VOLVO_MAX_DELTA_OFFSET_ANGLE = 20/0.04395-1;  // max degrees divided by k factor in dbc 0.04395. -1 to give a little safety margin. 
+const int VOLVO_MAX_DELTA_OFFSET_ANGLE = 20/0.04395-1;  // max degrees divided by k factor in dbc 0.04395. -1 to give a little safety margin.
                                                         // 25 degrees allowed, more will trigger disengage by servo.
 const int VOLVO_MAX_ANGLE_REQ = 8189;                   // max, min angle req, set at 2steps from max and min values.
 const int VOLVO_MIN_ANGLE_REQ = -8190;                  // 14 bits long, min -8192 -> 8191.
@@ -75,7 +75,7 @@ const struct lookup_t VOLVO_LOOKUP_ANGLE_RATE_DOWN = {
 
 struct sample_t volvo_angle_meas;  // last 3 steer angles
 
-/* 
+/*
 // saved for documentation purpose
 // allowed messages to forward from bus 0 -> 2
 const int ALLOWED_MSG_C1[] = {
@@ -90,7 +90,7 @@ const int ALLOWED_MSG_C1[] = {
 //0x80,
 0xb0,     // ECM
 //0xc0,
-0xe0,     // PSCM 
+0xe0,     // PSCM
 //0xf0,
 0xf5,     // BCM
 //0x100,
@@ -99,7 +99,7 @@ const int ALLOWED_MSG_C1[] = {
 //0x123,
 //0x125,  // PSCM - Do not forward. FSM sets fault code if it sees LKAActive and LKATorque when not requesting steering,
           //        Forwarding and manipulation of bits done in carcontroller.py
-0x130,    // BCM critical for ACC 
+0x130,    // BCM critical for ACC
 0x145,    // ECM critical for ACC
 0x150,    // BCM
 //0x1a8,
@@ -108,14 +108,14 @@ const int ALLOWED_MSG_C1[] = {
 0x1d0,    // DIM, Infotainment A , ACC ok, blis lka fcw off.
 //0x1d8,
 0x1e0,    // BCM , blis fcw nok.
-0x210,    // CEM, Infotainment A, ACC ok, lka blis fcw off. 
+0x210,    // CEM, Infotainment A, ACC ok, lka blis fcw off.
 0x260,    // ECM (When disconnecting CVM this message disappears. Why fault code for ECM?)
-0x288,    // SRS 
+0x288,    // SRS
 0x28c,    // ECM
 0x290,    // ECM
 0x291,    // ECM
-0x2a9,    // CEM, not critical 
-0x2b5,    // ECM 
+0x2a9,    // CEM, not critical
+0x2b5,    // ECM
 //0x2c0,
 //0x2c3,
 0x2c5,    // ECM
@@ -123,22 +123,22 @@ const int ALLOWED_MSG_C1[] = {
 //0x340,
 //0x350,
 0x360,    // CEM
-//0x370,  
-0x390,    // CEM, DIM 
+//0x370,
+0x390,    // CEM, DIM
 //0x3a0,
 //0x3af,
 //0x3b0,
 0x3c8,    // SRS
-//0x3ca, 
-//0x3d0, 
-//0x3e0, 
+//0x3ca,
+//0x3d0,
+//0x3e0,
 //0x3e5,
-//0x400, 
+//0x400,
 0x405,    // CEM, BCM, CanBus System Program failure, C0 01 55,
-//0x425,   
-//0x430,  
-//0x581,   
-0x764,    // Diagnostic messages 
+//0x425,
+//0x430,
+//0x581,
+0x764,    // Diagnostic messages
 0x7df,    // Diagnostic messages
 }; */
 
@@ -165,7 +165,7 @@ const int ALLOWED_MSG_EUCD[] = {
 0x20A,
 0x220,
 0x235,
-//0x246, PSCM1 
+//0x246, PSCM1
 0x261,
 0x264,
 0x265,
