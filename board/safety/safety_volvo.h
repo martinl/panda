@@ -58,7 +58,7 @@ float volvo_speed = 0;
 #define MSG_BTNS_VOLVO_V60 0x127     // Steering wheel buttons
 
 // safety params
-const float DEG_TO_CAN_VOLVO_C1 = 1/0.04395;            // 22.75312855517634‬, inverse of dbc scaling
+const float DEG_TO_CAN_VOLVO_C1 = 1/0.04395;            // 22.75312855517634, inverse of dbc scaling
 const int VOLVO_MAX_DELTA_OFFSET_ANGLE = 20/0.04395-1;  // max degrees divided by k factor in dbc 0.04395. -1 to give a little safety margin.
                                                         // 25 degrees allowed, more will trigger disengage by servo.
 const int VOLVO_MAX_ANGLE_REQ = 8189;                   // max, min angle req, set at 2steps from max and min values.
