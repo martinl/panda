@@ -35,6 +35,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
     python \
     python-dev \
+    qt5-default \
     unzip \
     wget \
     zlib1g-dev \
@@ -71,13 +72,13 @@ RUN cd /tmp && \
     cd /tmp/tmppilot && \
     git fetch origin $OPENPILOT_REF && \
     git checkout $OPENPILOT_REF && \
-    git submodule update --init cereal opendbc rednose_repo && \
+    git submodule update --init cereal opendbc rednose_repo body && \
     git -C opendbc fetch && \
     git -C opendbc checkout $OPENDBC_REF && \
     git -C opendbc reset --hard HEAD && \
     git -C opendbc clean -xfd && \
     mkdir /tmp/openpilot && \
-    cp -pR SConstruct site_scons/ tools/ selfdrive/ system/ common/ cereal/ opendbc/ rednose/ third_party/ /tmp/openpilot && \
+    cp -pR SConstruct site_scons/ tools/ selfdrive/ system/ common/ cereal/ opendbc/ rednose/ third_party/ body/ /tmp/openpilot && \
     rm -rf /tmp/openpilot/panda && \
     rm -rf /tmp/tmppilot
 
