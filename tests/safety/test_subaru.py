@@ -6,6 +6,7 @@ import panda.tests.safety.common as common
 from panda.tests.safety.common import CANPackerPanda
 
 
+MSG_SUBARU_Brake_Pedal      = 0x139
 MSG_SUBARU_Brake_Status     = 0x13c
 MSG_SUBARU_CruiseControl    = 0x240
 MSG_SUBARU_Throttle         = 0x40
