@@ -219,7 +219,7 @@ static int subaru_tx_hook(CANPacket_t *to_send) {
   }
 
   // steer cmd checks
-  if (addr == MSG_SUBARU_ES_LKAS && !subaru_forester_2022) {
+  if ((addr == MSG_SUBARU_ES_LKAS) && !subaru_forester_2022) {
     int desired_torque = ((GET_BYTES(to_send, 0, 4) >> 16) & 0x1FFFU);
     desired_torque = -1 * to_signed(desired_torque, 13);
 
