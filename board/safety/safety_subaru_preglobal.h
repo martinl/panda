@@ -28,7 +28,7 @@ const uint32_t SUBARU_PG_BRAKE_THRSLD = 2; // filter sensor noise, max_brake is 
 
 const CanMsg SUBARU_PG_TX_MSGS[] = {
   {MSG_SUBARU_PG_ES_Distance, SUBARU_PG_MAIN_BUS, 8},
-  {MSG_SUBARU_PG_ES_LKAS,     SUBARU_PG_MAIN_BUS, 8}
+  {MSG_SUBARU_PG_ES_LKAS,     SUBARU_PG_MAIN_BUS, 8},
   {MSG_SUBARU_PG_Throttle,    SUBARU_PG_CAM_BUS,  8}
 };
 #define SUBARU_PG_TX_MSGS_LEN (sizeof(SUBARU_PG_TX_MSGS) / sizeof(SUBARU_PG_TX_MSGS[0]))
