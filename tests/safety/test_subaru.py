@@ -39,7 +39,7 @@ def long_tx_msgs():
           [MSG_SUBARU_Brake_Status,     SUBARU_CAM_BUS]]
 
 def fwd_blacklisted_addr(lkas_msg=MSG_SUBARU_ES_LKAS):
-  return {SUBARU_CAM_BUS: [lkas_msg, MSG_SUBARU_ES_DashStatus, MSG_SUBARU_ES_LKAS_State, MSG_SUBARU_ES_Infotainment]}
+  return {SUBARU_MAIN_BUS: [MSG_SUBARU_Brake_Status], SUBARU_CAM_BUS: [lkas_msg, MSG_SUBARU_ES_DashStatus, MSG_SUBARU_ES_LKAS_State, MSG_SUBARU_ES_Infotainment]}
 
 class TestSubaruSafetyBase(common.PandaSafetyTest, MeasurementSafetyTest):
   FLAGS = 0
