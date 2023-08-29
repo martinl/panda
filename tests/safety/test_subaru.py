@@ -35,7 +35,8 @@ def lkas_tx_msgs(alt_bus, lkas_msg=MSG_SUBARU_ES_LKAS):
 
 def long_tx_msgs():
   return [[MSG_SUBARU_ES_Brake,         SUBARU_MAIN_BUS],
-          [MSG_SUBARU_ES_Status,        SUBARU_MAIN_BUS]]
+          [MSG_SUBARU_ES_Status,        SUBARU_MAIN_BUS],
+          [MSG_SUBARU_Brake_Status,     SUBARU_CAM_BUS]]
 
 def fwd_blacklisted_addr(lkas_msg=MSG_SUBARU_ES_LKAS):
   return {SUBARU_CAM_BUS: [lkas_msg, MSG_SUBARU_ES_DashStatus, MSG_SUBARU_ES_LKAS_State, MSG_SUBARU_ES_Infotainment]}
