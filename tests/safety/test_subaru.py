@@ -39,7 +39,7 @@ def long_tx_msgs():
           [MSG_SUBARU_Brake_Status,     SUBARU_CAM_BUS]]
 
 def fwd_blacklisted_addr(lkas_msg=MSG_SUBARU_ES_LKAS):
-  return {SUBARU_MAIN_BUS: [MSG_SUBARU_Brake_Status], SUBARU_CAM_BUS: [lkas_msg, MSG_SUBARU_ES_DashStatus, MSG_SUBARU_ES_LKAS_State, MSG_SUBARU_ES_Infotainment]}
+  return {SUBARU_CAM_BUS: [lkas_msg, MSG_SUBARU_ES_DashStatus, MSG_SUBARU_ES_LKAS_State, MSG_SUBARU_ES_Infotainment]}
 
 class TestSubaruSafetyBase(common.PandaSafetyTest, MeasurementSafetyTest):
   FLAGS = 0
@@ -123,9 +123,10 @@ class TestSubaruLongitudinalSafetyBase(TestSubaruSafetyBase, common.Longitudinal
   MAX_RPM = 2400
   MAX_POSSIBLE_RPM = 2**12
 
-  FWD_BLACKLISTED_ADDRS = {2: [MSG_SUBARU_ES_LKAS, MSG_SUBARU_ES_Brake, MSG_SUBARU_ES_Distance,
-                               MSG_SUBARU_ES_Status, MSG_SUBARU_ES_DashStatus,
-                               MSG_SUBARU_ES_LKAS_State, MSG_SUBARU_ES_Infotainment]}
+  FWD_BLACKLISTED_ADDRS = { SUBARU_MAIN_BUS: [MSG_SUBARU_Brake_Status],
+                            SUBARU_CAM_BUS:  [MSG_SUBARU_ES_LKAS, MSG_SUBARU_ES_Brake, MSG_SUBARU_ES_Distance,
+                                              MSG_SUBARU_ES_Status, MSG_SUBARU_ES_DashStatus,
+                                              MSG_SUBARU_ES_LKAS_State, MSG_SUBARU_ES_Infotainment]}
 
   def test_rpm_safety_check(self):
     self._generic_limit_safety_check(self._send_rpm_msg, self.MIN_RPM, self.MAX_RPM, 0, self.MAX_POSSIBLE_RPM, 1)
