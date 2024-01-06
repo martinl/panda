@@ -2,7 +2,7 @@ ruff
 libusb1==2.0.1
 numpy
 hexdump>=3.3
-pycryptodome==3.9.8
+pycryptodome==3.19.1
 tqdm>=4.14.0
 pytest
 pytest-mock
